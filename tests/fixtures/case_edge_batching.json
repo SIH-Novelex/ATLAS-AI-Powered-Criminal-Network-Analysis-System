@@ -1,0 +1,82 @@
+{
+  "case_metadata": {
+    "case_id": "CASE-EDGE-001",
+    "case_name": "Batching Edge-Case Fixture",
+    "case_type": "TEST",
+    "status": "OPEN",
+    "summary": "Synthetic payload exercising duplicate keys, missing targets, ON MATCH paths and fallback identifiers for the batched relationship writers."
+  },
+  "fir_records": [
+    {
+      "fir_id": "FIR-E-1",
+      "fir_number": "E/1/2026",
+      "police_station": "Edge PS",
+      "accused_person_ids": ["P-E1", "P-MISSING"]
+    }
+  ],
+  "source_records": [
+    { "source_record_id": "SR-E-1", "source_type": "CDR", "raw_reference": "cdr-e-1.csv" }
+  ],
+  "entities": {
+    "people": [
+      { "person_id": "P-E1", "name": "Edge One", "aliases": ["E1"], "roles": ["Suspect"] },
+      { "person_id": "P-E2", "name": "Edge Two", "roles": ["Associate"] }
+    ],
+    "phones": [
+      { "phone_number": "+91E1", "imei": "IMEI-E-SHARED", "owner_person_id": "P-E1" },
+      { "phone_number": "+91E2", "imei": "IMEI-E-SHARED", "owner_person_id": "P-E2" }
+    ],
+    "bank_accounts": [
+      { "account_number": "ACC-E1", "bank_name": "Edge Bank", "owner_person_id": "P-E1" },
+      { "account_number": "ACC-E2", "bank_name": "Edge Bank", "owner_person_id": "P-E2" }
+    ],
+    "vehicles": [
+      { "vin": "VIN-E1", "license_plate": "EDGE-0001", "owner_person_id": "P-E1" }
+    ],
+    "locations": [
+      { "location_id": "LOC-E1", "name": "Edge Plaza", "latitude": 1.0, "longitude": 2.0 }
+    ]
+  },
+  "relationships": {
+    "communications": [
+      { "call_id": "CALL-E-1", "source_phone": "+91E1", "target_phone": "+91E2", "timestamp": "2026-01-01T10:00:00Z", "duration_seconds": 60, "cell_tower": "T-E1", "source_record_id": "SR-E-1" },
+      { "call_id": "CALL-E-1", "source_phone": "+91E1", "target_phone": "+91E2", "timestamp": "2026-01-01T10:00:00Z", "duration_seconds": 90, "cell_tower": null },
+      { "communication_id": "COMM-E-2", "source_phone": "+91E2", "target_phone": "+91E3", "type": "SMS", "timestamp": "2026-01-01T11:00:00Z" },
+      { "source_phone": "+91E3", "target_phone": "+91E1", "timestamp": "2026-01-01T12:00:00Z", "duration_seconds": null }
+    ],
+    "transactions": [
+      { "transaction_id": "TX-E-1", "source_account": "ACC-E1", "target_account": "ACC-E2", "amount": 100.0, "timestamp": "2026-01-02T10:00:00Z", "reference_no": "REF-1", "source_record_id": "SR-E-1" },
+      { "transaction_id": "TX-E-1", "source_account": "ACC-E1", "target_account": "ACC-E2", "amount": 999.0, "timestamp": "2026-01-02T10:00:00Z" },
+      { "transaction_id": "TX-E-2", "source_account": "ACC-E2", "target_account": "ACC-E3", "amount": 50.5, "currency": "USD", "timestamp": "2026-01-02T11:00:00Z", "transaction_type": "WIRE" }
+    ]
+  },
+  "surveillance_logs": [
+    {
+      "log_id": "SURV-E-1", "location_id": "LOC-E1", "location_name": "Edge Plaza", "latitude": 1.0, "longitude": 2.0,
+      "timestamp": "2026-01-03T09:00:00Z",
+      "observed_person_ids": ["P-E1", "P-E2"], "observed_vehicle_vins": ["VIN-E1"],
+      "activity_description": "Meeting", "evidence_ref": "CAM-1.mp4", "source_record_id": "SR-E-1"
+    },
+    {
+      "log_id": "SURV-E-2",
+      "timestamp": "2026-01-03T10:00:00Z",
+      "observed_person_ids": ["P-E1", "P-MISSING"], "observed_vehicle_vins": ["VIN-MISSING"],
+      "activity_description": "Sighting without explicit location"
+    },
+    {
+      "log_id": "SURV-E-3", "location_id": "LOC-E1",
+      "timestamp": "2026-01-03T11:00:00Z",
+      "observed_person_ids": ["P-E2"], "observed_vehicle_vins": []
+    }
+  ],
+  "criminal_history": [
+    { "record_id": "CRIM-E-1", "person_id": "P-E1", "case_number": "CC-E-1", "offense": "Test Offense", "year": 2020 },
+    { "record_id": "CRIM-E-2", "person_id": "P-MISSING", "case_number": "CC-E-2", "offense": "Orphan Record" },
+    { "record_id": "CRIM-E-1", "person_id": "P-E2", "case_number": "CC-E-1-DUP", "status": "PENDING" }
+  ],
+  "intelligence_reports": [
+    { "report_id": "INTEL-E-1", "source_agency": "Unit A", "reliability_score": 0.9, "content": "First memo" },
+    { "report_id": "INTEL-E-2", "source_agency": "Unit B", "content": "Second memo" },
+    { "report_id": "INTEL-E-1", "source_agency": "Unit C", "reliability_score": 0.1, "content": "Duplicate id, must not overwrite" }
+  ]
+}

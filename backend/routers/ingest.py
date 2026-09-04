@@ -1,0 +1,214 @@
+import json
+from typing import List, Optional, Tuple
+from fastapi import APIRouter, File, UploadFile, HTTPException, Header, Query, Body, status, Response
+from pydantic import ValidationError
+from backend.database import db
+from backend.services.ingestion_engine import CaseIngestionEngine
+from backend.services.schema_mapper import map_ingestion_to_graph_data
+from backend.services.ingestion_service import IngestionService
+from backend.models.case_input import CaseData, CaseEnvelope, IngestCreatedCounts, IngestResponse
+from backend.logging_config import logger
+
+router = APIRouter(prefix="/api/v1", tags=["Unified Data Ingestion"])
+
+# (case_data, dataset_id, dataset_version): exactly what IngestionService.ingest_case needs.
+CaseDocument = Tuple[CaseData, str, str]
+
+
+def _detect_case_data_document(filename: str, text_content: str) -> Optional[CaseDocument]:
+    """Return a validated CaseData document if the uploaded content is a structured JSON case, else ``None``.
+
+    Detection allows structured JSON files (whether CaseEnvelope, CaseData, or ConsolidatedCaseData format)
+    to bypass the legacy unstructured extraction engine and proceed directly to graph generation:
+      * the content must parse as a JSON object;
+      * a CaseEnvelope-shaped object (``{"case_data": {...}}``) is unwrapped;
+      * an object declaring ``case_metadata`` is validated as CaseData, or translated via ``map_ingestion_to_graph_data``;
+      * non-JSON files or arbitrary JSON without ``case_metadata`` return ``None`` and go through the legacy extraction engine.
+    """
+    try:
+        data = json.loads(text_content)
+    except ValueError:  # includes json.JSONDecodeError
+        return None
+    if not isinstance(data, dict):
+        return None
+
+    document: Optional[CaseDocument] = None
+
+    if isinstance(data.get("case_data"), dict):
+        try:
+            envelope = CaseEnvelope.model_validate(data)
+            document = (
+                envelope.case_data,
+                envelope.dataset_id or "DS-DEFAULT",
+                envelope.dataset_version or "1.0",
+            )
+        except ValidationError:
+            pass
+
+    if document is None and "case_metadata" in data:
+        # First, attempt strict CaseData validation
+        try:
+            document = (CaseData.model_validate(data), "DS-DEFAULT", "1.0")
+        except ValidationError:
+            # Second, attempt direct schema mapping (supports ConsolidatedCaseData & other structured JSON formats)
+            try:
+                mapped = map_ingestion_to_graph_data(data)
+                document = (mapped, "DS-DEFAULT", "1.0")
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"File '{filename}' declares 'case_metadata' but could not be parsed or mapped into a valid CaseData document: {str(exc)}",
+                )
+
+    if document is None:
+        return None
+
+    if not document[0].case_metadata.case_id:  # same guard as POST /api/cases/ingest
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File '{filename}': missing required 'case_metadata.case_id' in ingestion payload.",
+        )
+    return document
+
+
+
+def _combine_results(results: List[IngestResponse]) -> IngestResponse:
+    """One IngestResponse per request: unchanged for a single document, totals for several.
+
+    Several documents occur when a folder upload contains more than one CaseData JSON file
+    (legacy files are still consolidated into a single document, as before).  Counts are
+    summed, insights are de-duplicated by ``insight_id``, ``case_id`` is the last case
+    ingested and a warning lists every case ingested.
+    """
+    if len(results) == 1:
+        return results[0]
+
+    insights, seen_ids = [], set()
+    for result in results:
+        for insight in result.insights:
+            if insight.insight_id not in seen_ids:
+                seen_ids.add(insight.insight_id)
+                insights.append(insight)
+
+    warnings = [warning for result in results for warning in result.warnings]
+    warnings.append(
+        f"Ingested {len(results)} case documents in one request "
+        f"({', '.join(result.case_id for result in results)}); counts are totals and "
+        f"'case_id' is the last case ingested."
+    )
+    last = results[-1]
+    return IngestResponse(
+        case_id=last.case_id,
+        dataset_id=last.dataset_id,
+        dataset_version=last.dataset_version,
+        created=IngestCreatedCounts(
+            nodes=sum(result.created.nodes for result in results),
+            relationships=sum(result.created.relationships for result in results),
+            source_records=sum(result.created.source_records for result in results),
+        ),
+        matched_existing_entities=sum(result.matched_existing_entities for result in results),
+        new_cross_case_links=sum(
+            1 for insight in insights if insight.insight_type in ["CROSS_CASE_LINK", "SHARED_ENTITY", "BRIDGE_NODE"]
+        ),
+        new_insights=len(insights),
+        warnings=warnings,
+        insights=insights,
+    )
+
+
+@router.post("/ingest", response_model=IngestResponse, summary="Ingest case files (structured CSV & unstructured text) to Neo4j")
+async def ingest_files(
+    response: Response,
+    files: List[UploadFile] = File(...),
+    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
+    api_key: Optional[str] = Query(None)
+):
+    if not files:
+        raise HTTPException(status_code=400, detail="No files uploaded.")
+
+    active_key = x_api_key or api_key
+    engine = CaseIngestionEngine(api_key=active_key)
+
+    documents: List[CaseDocument] = []
+    legacy_files = 0
+    for file in files:
+        filename = file.filename or "uploaded_file.txt"
+        contents = await file.read()
+        text_content = contents.decode("utf-8", errors="ignore")
+
+        # CaseData JSON documents take the same pipeline as POST /api/cases/ingest and never
+        # enter the legacy CaseIngestionEngine; everything else is parsed exactly as before.
+        document = _detect_case_data_document(filename, text_content)
+        if document is not None:
+            logger.info(
+                f"'{filename}' is a CaseData JSON document (case '{document[0].case_metadata.case_id}'); "
+                f"bypassing legacy CaseIngestionEngine."
+            )
+            documents.append(document)
+            continue
+
+        engine.parse_file(filename, text_content)
+        legacy_files += 1
+
+    if legacy_files:
+        consolidated_case = engine.consolidate()
+        graph_case_data = map_ingestion_to_graph_data(consolidated_case.model_dump())
+        documents.append((graph_case_data, "DS-DEFAULT", "1.0"))
+
+    try:
+        with db.get_session() as session:
+            results = [
+                IngestionService.ingest_case(
+                    session=session,
+                    case_data=case_data,
+                    dataset_id=dataset_id,
+                    dataset_version=dataset_version,
+                    mode="merge"
+                )
+                for case_data, dataset_id, dataset_version in documents
+            ]
+            response.status_code = status.HTTP_201_CREATED
+            return _combine_results(results)
+    except Exception as e:
+        logger.exception(f"Error saving case ingestion to Neo4j: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to ingest case data into Neo4j: {str(e)}"
+        )
+
+
+@router.post("/ingest/text", response_model=IngestResponse, summary="Ingest raw text payload directly to Neo4j")
+async def ingest_text(
+    response: Response,
+    payload: str = Body(..., media_type="text/plain", description="Raw case file narrative, CSV data, or FIR text"),
+    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
+    api_key: Optional[str] = Query(None)
+):
+    if not payload or not payload.strip():
+        raise HTTPException(status_code=400, detail="Payload body cannot be empty.")
+
+    active_key = x_api_key or api_key
+    engine = CaseIngestionEngine(api_key=active_key)
+    engine.parse_file("input_payload.txt", payload)
+
+    consolidated_case = engine.consolidate()
+    graph_case_data = map_ingestion_to_graph_data(consolidated_case.model_dump())
+
+    try:
+        with db.get_session() as session:
+            ingest_result = IngestionService.ingest_case(
+                session=session,
+                case_data=graph_case_data,
+                dataset_id="DS-DEFAULT",
+                dataset_version="1.0",
+                mode="merge"
+            )
+            response.status_code = status.HTTP_201_CREATED
+            return ingest_result
+    except Exception as e:
+        logger.exception(f"Error saving case text ingestion to Neo4j: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to ingest case data into Neo4j: {str(e)}"
+        )
+

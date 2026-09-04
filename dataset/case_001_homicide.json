@@ -1,0 +1,262 @@
+{
+  "case_metadata": {
+    "case_id": "CASE-2024-001",
+    "case_name": "Operation Nightfall Homicide Investigation",
+    "case_type": "HOMICIDE",
+    "status": "UNDER_INVESTIGATION",
+    "jurisdiction": "Metro Central Police Division",
+    "lead_investigator": "Inspector Vikram Malhotra",
+    "created_date": "2024-10-15",
+    "summary": "Investigation into the targeted homicide of businessman Rajiv Sen at Grand Park Hotel, involving coordinated surveillance and financial kickbacks.",
+    "tags": ["Homicide", "Contract_Killing", "High_Priority"]
+  },
+  "fir_records": [
+    {
+      "fir_id": "FIR-2024-1092",
+      "fir_number": "1092/2024",
+      "police_station": "Central Station",
+      "date": "2024-10-15",
+      "sections": ["IPC 302", "IPC 120B", "Arms Act 25"],
+      "complainant": "Amit Sen",
+      "summary": "FIR lodged regarding armed assault resulting in death of Rajiv Sen.",
+      "accused_person_ids": ["P-001", "P-002"]
+    }
+  ],
+  "entities": {
+    "people": [
+      {
+        "person_id": "P-001",
+        "name": "Devendra Sharma",
+        "aliases": ["Deva", "The Broker"],
+        "dob": "1982-06-14",
+        "national_id": "ID-DEV-8891",
+        "roles": ["Suspect", "Organizer"],
+        "risk_level": "CRITICAL",
+        "notes": "Suspected syndicate coordinator with prior extortion cases."
+      },
+      {
+        "person_id": "P-002",
+        "name": "Karan Singhania",
+        "aliases": ["Karan Shooter"],
+        "dob": "1994-03-22",
+        "national_id": "ID-KAR-4421",
+        "roles": ["Suspect", "Shooter"],
+        "risk_level": "CRITICAL",
+        "notes": "Observed on CCTV near crime scene."
+      },
+      {
+        "person_id": "P-003",
+        "name": "Rajiv Sen",
+        "aliases": ["R. Sen"],
+        "dob": "1975-11-08",
+        "national_id": "ID-RAJ-1002",
+        "roles": ["Victim"],
+        "risk_level": "LOW",
+        "notes": "Targeted real estate investor."
+      },
+      {
+        "person_id": "P-004",
+        "name": "Manish Verma",
+        "aliases": ["Manny"],
+        "dob": "1988-09-30",
+        "national_id": "ID-MAN-7712",
+        "roles": ["Associate", "Mule"],
+        "risk_level": "MEDIUM",
+        "notes": "Account holder used for intermediary transfer."
+      }
+    ],
+    "phones": [
+      {
+        "phone_number": "+919876543210",
+        "phone_id": "PH-001",
+        "imei": "IMEI-864201041122334",
+        "carrier": "Airtel",
+        "registered_owner": "Devendra Sharma",
+        "owner_person_id": "P-001"
+      },
+      {
+        "phone_number": "+919876543211",
+        "phone_id": "PH-002",
+        "imei": "IMEI-864201041122334",
+        "carrier": "Jio",
+        "registered_owner": "Karan Singhania",
+        "owner_person_id": "P-002"
+      },
+      {
+        "phone_number": "+919876543212",
+        "phone_id": "PH-003",
+        "imei": "IMEI-998877665544332",
+        "carrier": "Vodafone",
+        "registered_owner": "Rajiv Sen",
+        "owner_person_id": "P-003"
+      }
+    ],
+    "bank_accounts": [
+      {
+        "account_number": "ACC-9001-DEV",
+        "account_id": "B-001",
+        "bank_name": "HDFC Bank",
+        "account_type": "CURRENT",
+        "branch": "MG Road Branch",
+        "holder_name": "Devendra Sharma",
+        "owner_person_id": "P-001"
+      },
+      {
+        "account_number": "ACC-9002-MULE",
+        "account_id": "B-002",
+        "bank_name": "ICICI Bank",
+        "account_type": "SAVINGS",
+        "branch": "Indiranagar Branch",
+        "holder_name": "Manish Verma",
+        "owner_person_id": "P-004"
+      },
+      {
+        "account_number": "ACC-9003-SHOOTER",
+        "account_id": "B-003",
+        "bank_name": "State Bank of India",
+        "account_type": "SAVINGS",
+        "branch": "Koramangala Branch",
+        "holder_name": "Karan Singhania",
+        "owner_person_id": "P-002"
+      }
+    ],
+    "vehicles": [
+      {
+        "vin": "VIN-MAH-XUV-90118",
+        "vehicle_id": "VEH-001",
+        "license_plate": "KA-01-MJ-4490",
+        "make": "Mahindra",
+        "model": "XUV700",
+        "color": "Midnight Black",
+        "registered_owner": "Devendra Sharma",
+        "owner_person_id": "P-001"
+      }
+    ],
+    "social_handles": [
+      {
+        "handle_id": "telegram_deva_broker",
+        "platform": "Telegram",
+        "handle": "deva_broker",
+        "associated_email": "devasharma@protonmail.com",
+        "display_name": "Deva B",
+        "owner_person_id": "P-001"
+      }
+    ],
+    "ip_addresses": [
+      {
+        "ip_address": "198.51.100.45",
+        "ip_type": "IPV4",
+        "asn": "AS45102",
+        "isp": "ACT Fibernet"
+      }
+    ],
+    "cell_towers": [
+      {
+        "cell_tower_id": "TOWER-BLR-041",
+        "tower_code": "LAC402-CID104",
+        "operator": "Airtel",
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "location_id": "LOC-HOTEL-01"
+      }
+    ],
+    "locations": [
+      {
+        "location_id": "LOC-HOTEL-01",
+        "name": "Grand Park Hotel",
+        "address": "45 MG Road, Bangalore",
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "location_type": "CRIME_SCENE"
+      }
+    ]
+  },
+  "relationships": {
+    "communications": [
+      {
+        "call_id": "CALL-2024-001",
+        "source_phone": "+919876543210",
+        "target_phone": "+919876543211",
+        "type": "VOICE_CALL",
+        "timestamp": "2024-10-15T18:30:00Z",
+        "duration_seconds": 180,
+        "cell_tower": "TOWER-BLR-041",
+        "source_record_id": "CDR-2024-10"
+      },
+      {
+        "call_id": "CALL-2024-002",
+        "source_phone": "+919876543211",
+        "target_phone": "+919876543212",
+        "type": "VOICE_CALL",
+        "timestamp": "2024-10-15T19:15:00Z",
+        "duration_seconds": 45,
+        "cell_tower": "TOWER-BLR-041",
+        "source_record_id": "CDR-2024-10"
+      }
+    ],
+    "transactions": [
+      {
+        "transaction_id": "TX-2024-8801",
+        "source_account": "ACC-9001-DEV",
+        "target_account": "ACC-9002-MULE",
+        "amount": 500000.0,
+        "currency": "INR",
+        "timestamp": "2024-10-14T11:00:00Z",
+        "transaction_type": "RTGS",
+        "reference_no": "RTGS99201948",
+        "source_record_id": "STMT-HDFC-10"
+      },
+      {
+        "transaction_id": "TX-2024-8802",
+        "source_account": "ACC-9002-MULE",
+        "target_account": "ACC-9003-SHOOTER",
+        "amount": 480000.0,
+        "currency": "INR",
+        "timestamp": "2024-10-14T14:30:00Z",
+        "transaction_type": "IMPS",
+        "reference_no": "IMPS88301122",
+        "source_record_id": "STMT-ICICI-10"
+      }
+    ]
+  },
+  "surveillance_logs": [
+    {
+      "log_id": "SURV-LOG-01",
+      "location_id": "LOC-HOTEL-01",
+      "location_name": "Grand Park Hotel",
+      "latitude": 12.9716,
+      "longitude": 77.5946,
+      "timestamp": "2024-10-15T19:00:00Z",
+      "observed_person_ids": ["P-002", "P-003"],
+      "observed_vehicle_vins": ["VIN-MAH-XUV-90118"],
+      "observed_phone_numbers": ["+919876543211"],
+      "activity_description": "Suspect Karan Singhania seen approaching victim Rajiv Sen in hotel lobby.",
+      "evidence_ref": "CCTV-CAM-04-1900.mp4",
+      "source_record_id": "CCTV-LOG-OCT15"
+    }
+  ],
+  "criminal_history": [
+    {
+      "record_id": "CRIM-DEV-001",
+      "person_id": "P-001",
+      "case_number": "CC-2019-450",
+      "offense": "Extortion and Criminal Intimidation",
+      "jurisdiction": "Sessions Court Bangalore",
+      "status": "CONVICTED",
+      "year": 2019,
+      "source_record_id": "COURT-REC-2019"
+    }
+  ],
+  "intelligence_reports": [
+    {
+      "report_id": "INTEL-2024-910",
+      "source_agency": "Crime Intelligence Bureau",
+      "date": "2024-10-12",
+      "reliability_score": 0.95,
+      "content": "Informant reports Devendra Sharma actively contracted hitmen for a dispute over commercial property.",
+      "entities_mentioned": ["P-001", "P-002"],
+      "source_record_id": "RAW-INTEL-MEMO-910"
+    }
+  ]
+}
+

@@ -1,0 +1,2729 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Crime & Case Graph Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0: #070a12;
+  --bg1: #0c111e;
+  --bg2: #101728;
+  --surface: #141d33;
+  --surface-hover: #192542;
+  --surface-active: #1f2e52;
+  --glass: rgba(18, 26, 46, 0.72);
+  --glass-strong: rgba(20, 29, 51, 0.92);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-focus: #00d2ff;
+  --text: #f1f5f9;
+  --text-dim: #94a3b8;
+  --text-faint: #64748b;
+  --accent: #00d2ff;
+  --accent-glow: rgba(0, 210, 255, 0.28);
+  --accent-gradient: linear-gradient(135deg, #00d2ff, #6366f1);
+  --accent-secondary: #6366f1;
+  --cyan: #06b6d4;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #f43f5e;
+  --danger: #ef4444;
+  --danger-glow: rgba(239, 68, 68, 0.3);
+  --danger-gradient: linear-gradient(135deg, #ef4444, #dc2626);
+  --neu-light: rgba(255, 255, 255, 0.05);
+  --neu-dark: rgba(0, 0, 0, 0.45);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow-soft: 0 24px 60px -20px rgba(0, 0, 0, 0.75);
+  --shadow-card: 0 4px 24px -8px rgba(0, 0, 0, 0.55);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --graph-bg: rgba(6, 9, 17, 0.85);
+}
+
+[data-theme="light"] {
+  --bg0: #f1f5f9;
+  --bg1: #f8fafc;
+  --bg2: #e2e8f0;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --surface-active: #e2e8f0;
+  --glass: rgba(255, 255, 255, 0.88);
+  --glass-strong: rgba(255, 255, 255, 0.96);
+  --border: rgba(15, 23, 42, 0.12);
+  --border-strong: rgba(15, 23, 42, 0.22);
+  --border-focus: #0284c7;
+  --text: #0f172a;
+  --text-dim: #334155;
+  --text-faint: #64748b;
+  --accent: #0284c7;
+  --accent-glow: rgba(2, 132, 199, 0.22);
+  --accent-gradient: linear-gradient(135deg, #0284c7, #4f46e5);
+  --accent-secondary: #4f46e5;
+  --cyan: #0891b2;
+  --green: #059669;
+  --amber: #d97706;
+  --red: #dc2626;
+  --danger: #dc2626;
+  --danger-glow: rgba(220, 38, 38, 0.22);
+  --danger-gradient: linear-gradient(135deg, #dc2626, #b91c1c);
+  --neu-light: rgba(255, 255, 255, 0.8);
+  --neu-dark: rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 20px 48px -15px rgba(15, 23, 42, 0.14);
+  --shadow-card: 0 4px 20px -4px rgba(15, 23, 42, 0.08);
+  --graph-bg: #f8fafc;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  color: var(--text);
+  min-height: 100vh;
+  background: var(--bg0);
+  background-image:
+    radial-gradient(1100px 750px at 90% -10%, var(--accent-glow), transparent 60%),
+    radial-gradient(900px 650px at -10% 25%, rgba(99, 102, 241, 0.15), transparent 55%),
+    linear-gradient(165deg, var(--bg0), var(--bg1) 45%, var(--bg2));
+  background-attachment: fixed;
+  overflow-x: hidden;
+  transition: background .25s ease, color .25s ease;
+}
+
+a { color: var(--accent); text-decoration: none; }
+button { font-family: var(--font); cursor: pointer; border: none; outline: none; }
+input, select, textarea { font-family: var(--font); color: var(--text); }
+
+/* Ambient blobs */
+.blob { position: fixed; border-radius: 50%; filter: blur(95px); opacity: .4; z-index: 0; pointer-events: none; }
+.blob-1 { width: 440px; height: 440px; background: #00d2ff; top: -140px; right: -70px; }
+.blob-2 { width: 380px; height: 380px; background: #6366f1; bottom: -120px; left: -50px; opacity: .3; }
+.noise {
+  position: fixed; inset: 0; opacity: .025; pointer-events: none; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* App shell & sidebar */
+.app { position: relative; z-index: 1; display: grid; grid-template-columns: 264px 1fr; min-height: 100vh; }
+.sidebar {
+  position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column;
+  padding: 22px 16px; border-right: 1px solid var(--border);
+  background: var(--glass);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+.brand { display: flex; align-items: center; gap: 12px; padding: 6px 10px 20px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.brand-logo {
+  width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex-shrink: 0;
+  background: var(--accent-gradient);
+  box-shadow: 0 8px 24px -6px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.brand-logo svg { width: 24px; height: 24px; stroke: #fff; }
+.brand-name { font-weight: 800; font-size: 19px; letter-spacing: -0.4px; }
+.brand-sub { font-size: 11px; color: var(--text-faint); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+
+.nav-label { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 12px; font-weight: 700; }
+.nav { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 13px; color: var(--text-dim);
+  font-size: 13.5px; font-weight: 600; transition: .18s; position: relative; border: 1px solid transparent; background: transparent;
+}
+.nav-item:hover { color: var(--text); background: var(--surface-hover); }
+.nav-item.active {
+  color: #fff; border-color: var(--border-strong);
+  background: var(--accent-gradient);
+  box-shadow: var(--shadow-card), 0 4px 16px -4px var(--accent-glow);
+}
+[data-theme="light"] .nav-item.active { color: #fff; }
+.nav-item svg { width: 18px; height: 18px; stroke: currentColor; flex-shrink: 0; }
+
+.side-foot { padding: 14px 10px 6px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-faint); line-height: 1.6; }
+.side-foot-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 8px; }
+
+/* Main Content */
+.main { padding: 26px 36px 60px; max-width: 1280px; width: 100%; margin: 0 auto; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
+.topbar-title h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+.topbar-title p { color: var(--text-dim); font-size: 13.5px; margin-top: 4px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.status-pill {
+  display: flex; align-items: center; gap: 9px; padding: 8px 16px; border-radius: 40px; font-size: 13px; font-weight: 600;
+  background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: var(--shadow-card);
+}
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-faint); }
+.status-dot.ok { background: var(--green); box-shadow: 0 0 12px var(--green); }
+.status-dot.bad { background: var(--red); box-shadow: 0 0 12px var(--red); }
+.status-meta { font-weight: 500; color: var(--text-faint); font-size: 12px; margin-left: 4px; font-family: var(--mono); }
+
+/* Theme Toggle Button */
+.theme-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: 38px; height: 38px; border-radius: 12px; background: var(--surface);
+  border: 1px solid var(--border); color: var(--text-dim); transition: .2s;
+}
+.theme-btn:hover { color: var(--text); border-color: var(--accent); transform: translateY(-1px); }
+.theme-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+
+/* Stat cards & Grid */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 26px; }
+.stat-card {
+  position: relative; padding: 22px; border-radius: var(--radius); overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  box-shadow: var(--shadow-card); transition: .22s;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+.stat-card::after {
+  content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, var(--glow, rgba(0, 210, 255, 0.2)), transparent 70%); opacity: .6;
+}
+.stat-label { font-size: 11.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.stat-value { font-size: 32px; font-weight: 800; margin-top: 8px; letter-spacing: -1px; display: flex; align-items: baseline; gap: 6px; }
+.stat-value small { font-size: 13.5px; color: var(--text-faint); font-weight: 500; }
+.stat-foot { font-size: 12px; color: var(--text-faint); margin-top: 6px; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); padding: 24px; margin-bottom: 22px; transition: .2s;
+}
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.card-title { font-size: 16.5px; font-weight: 700; letter-spacing: -0.3px; display: flex; align-items: center; gap: 10px; }
+.card-title svg { width: 20px; height: 20px; stroke: var(--accent); }
+.card-desc { color: var(--text-faint); font-size: 12.5px; margin-top: 4px; }
+
+/* Buttons & Inputs */
+.neu-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 18px; border-radius: 12px; font-size: 13.5px; font-weight: 600; color: var(--text);
+  background: var(--surface-hover); border: 1px solid var(--border);
+  box-shadow: 0 2px 8px -2px rgba(0,0,0,0.2); transition: .18s;
+}
+.neu-btn:hover { transform: translateY(-1px); border-color: var(--border-strong); background: var(--surface-active); color: var(--text); }
+.neu-btn:active { transform: translateY(1px); }
+.neu-btn svg { width: 16px; height: 16px; stroke: currentColor; }
+.neu-btn.primary {
+  background: var(--accent-gradient); color: #fff; border-color: transparent;
+  box-shadow: 0 6px 20px -4px var(--accent-glow);
+}
+.neu-btn.primary:hover { box-shadow: 0 8px 24px -4px var(--accent-glow); filter: brightness(1.05); }
+.neu-btn.ghost { background: transparent; border-color: var(--border); color: var(--text-dim); }
+.neu-btn.ghost:hover { background: var(--surface-hover); color: var(--text); }
+.neu-btn.danger {
+  background: var(--danger-gradient); color: #fff; border-color: transparent;
+  box-shadow: 0 6px 20px -4px var(--danger-glow);
+}
+.neu-btn.danger:hover { box-shadow: 0 8px 24px -4px var(--danger-glow); filter: brightness(1.08); }
+.neu-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+.field label { font-size: 11.5px; color: var(--text-dim); font-weight: 700; letter-spacing: .4px; text-transform: uppercase; }
+.control {
+  padding: 11px 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 13.5px;
+  background: var(--bg1); outline: none; transition: .2s; color: var(--text);
+}
+.control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.control::placeholder { color: var(--text-faint); }
+select.control option { background: var(--bg1); color: var(--text); }
+.row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); }
+thead th {
+  color: var(--text-faint); font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  text-align: left; padding: 13px 16px; font-weight: 700; border-bottom: 1px solid var(--border);
+  background: var(--bg1);
+}
+tbody td { padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--text-dim); }
+tbody tr { transition: .15s; }
+tbody tr:hover { background: var(--surface-hover); }
+tbody tr:hover td { color: var(--text); }
+.mono { font-family: var(--mono); font-size: 12px; }
+
+/* Badges / Tags */
+.tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: .3px; }
+.tag.crit { background: rgba(244, 63, 94, 0.18); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3); }
+.tag.high { background: rgba(245, 158, 11, 0.18); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
+.tag.med { background: rgba(6, 182, 212, 0.16); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3); }
+.tag.low { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+.tag.open { background: rgba(0, 210, 255, 0.15); color: var(--accent); border: 1px solid var(--accent-glow); }
+.tag.closed { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; border: 1px solid rgba(167, 139, 250, 0.3); }
+.tag.plain { background: var(--surface-hover); color: var(--text-dim); border: 1px solid var(--border); }
+
+/* Results & List rows */
+.result-item {
+  padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: .18s;
+  background: var(--surface);
+}
+.result-item:hover { border-color: var(--accent); background: var(--surface-hover); transform: translateX(3px); }
+.result-main { display: flex; flex-direction: column; gap: 4px; }
+.result-name { font-weight: 700; color: var(--text); font-size: 14px; }
+.result-sub { font-size: 12px; color: var(--text-faint); }
+
+.list-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; gap: 12px; border-bottom: 1px solid var(--border); }
+.list-row:hover { background: var(--surface-hover); }
+.list-row .l-name { font-weight: 600; color: var(--text); font-size: 14px; }
+.list-row .l-sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+
+/* Graph Canvas & Legend */
+#graph { width: 100%; height: 560px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--graph-bg); overflow: hidden; display: flex; position: relative; }
+#graphCanvas { flex: 1; height: 100%; position: relative; min-width: 0; }
+.graph-ai-box {
+  width: 340px; height: 100%; border-left: 1px solid var(--border); background: var(--surface);
+  display: flex; flex-direction: column; z-index: 5; flex-shrink: 0;
+}
+.graph-ai-box.collapsed { display: none; }
+.graph-ai-header {
+  padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg1);
+}
+.graph-ai-body {
+  flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px;
+}
+.graph-ai-footer {
+  padding: 9px 12px; border-top: 1px solid var(--border); background: var(--bg1);
+}
+.ai-msg {
+  padding: 9px 12px; border-radius: 9px; font-size: 12px; line-height: 1.5; max-width: 95%; word-break: break-word;
+}
+.ai-msg.bot {
+  background: var(--bg1); border: 1px solid var(--border); align-self: flex-start; color: var(--text);
+}
+.ai-msg.user {
+  background: rgba(0, 210, 255, 0.12); border: 1px solid rgba(0, 210, 255, 0.28); align-self: flex-end; color: var(--text); font-weight: 500;
+}
+.ai-msg-hdr {
+  font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 5px; display: flex; align-items: center; gap: 5px;
+}
+.ai-quick-chips {
+  margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px;
+}
+.ai-chip {
+  padding: 4px 7px; border-radius: 6px; font-size: 11px; background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-dim); cursor: pointer; transition: all 0.15s ease; text-align: left;
+}
+.ai-chip:hover {
+  background: rgba(0, 210, 255, 0.15); color: var(--accent); border-color: rgba(0, 210, 255, 0.4);
+}
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 12px; color: var(--text-dim); }
+.legend .lg { display: flex; align-items: center; gap: 7px; }
+.legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Skeleton */
+@keyframes shine { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+.skeleton {
+  border-radius: 10px; background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+  background-size: 200% 100%; animation: shine 1.4s infinite;
+}
+.sk-row { height: 22px; margin: 12px 0; border-radius: 8px; }
+
+/* Toasts */
+#toasts { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast {
+  padding: 13px 18px; border-radius: 13px; font-size: 13.5px; font-weight: 600; color: var(--text); min-width: 280px; max-width: 420px;
+  background: var(--glass-strong); border: 1px solid var(--border-strong); backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-soft); animation: slidein .3s ease; pointer-events: auto;
+}
+.toast.ok { border-left: 4px solid var(--green); }
+.toast.err { border-left: 4px solid var(--red); }
+.toast.info { border-left: 4px solid var(--accent); }
+@keyframes slidein { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast.out { transition: .3s ease; transform: translateX(120%); opacity: 0; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(5, 8, 16, 0.75); backdrop-filter: blur(8px);
+  z-index: 2000; display: grid; place-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: .22s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  width: 100%; max-width: 650px; max-height: 88vh; overflow-y: auto; border-radius: var(--radius); padding: 28px;
+  background: var(--surface); border: 1px solid var(--border-strong); box-shadow: var(--shadow-soft);
+}
+.modal h3 { font-weight: 800; font-size: 20px; letter-spacing: -.4px; margin-bottom: 16px; }
+.kv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; margin-top: 8px; }
+.kv div { background: var(--bg1); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); }
+.kv .k { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; }
+.kv .v { font-size: 13.5px; margin-top: 4px; color: var(--text); word-break: break-word; }
+
+/* Confirmation Dialog Inside Modal */
+.confirm-box { text-align: left; }
+.confirm-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.confirm-header svg { width: 28px; height: 28px; stroke: var(--danger); flex-shrink: 0; }
+.confirm-title { font-size: 18px; font-weight: 800; }
+.confirm-body { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 22px; }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 12px; }
+
+/* Empty state */
+.empty {
+  padding: 44px 20px; text-align: center; color: var(--text-faint); font-size: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+}
+.empty svg { width: 36px; height: 36px; stroke: var(--text-faint); opacity: .6; }
+
+/* Responsive */
+.hamburger { display: none; }
+@media(max-width: 960px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 270px; transform: translateX(-100%); transition: .28s ease; z-index: 1000; }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+  .main { padding: 18px 18px 50px; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 900; opacity: 0; pointer-events: none; transition: .28s; }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
+
+.fade-in { animation: fadeIn .35s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="noise"></div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="6" r="3"/><circle cx="18" cy="7" r="3"/><circle cx="12" cy="18" r="3"/>
+          <path d="M8.7 8.1 10 10M15.2 9l-.6 2M10 12.6l1 2.4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Atlas</div>
+        <div class="brand-sub">Graph Intelligence</div>
+      </div>
+    </div>
+    <div class="nav-label">Analytics Modules</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div>Case-Graph Intelligence Engine</div>
+      <div class="mono" style="color:var(--text-faint);font-size:10.5px">Neo4j GDS · FastAPI</div>
+      <div class="side-foot-actions">
+        <button class="neu-btn ghost danger" style="padding:6px 10px;font-size:11px" onclick="promptResetDatabase()">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Reset DB
+        </button>
+        <button class="theme-btn" id="sideThemeBtn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="topbar-title">
+          <h1 id="page-title">Command Center</h1>
+          <p id="page-sub">Crime & Case Graph Intelligence</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="status-pill" id="statusPill">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Connecting…</span>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme">
+          <svg id="topThemeIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <section id="view"></section>
+  </main>
+</div>
+
+<div id="toasts"></div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+<script>
+  if (typeof vis === 'undefined') {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"><\/script>');
+  }
+</script>
+<script>
+  if (typeof vis === 'undefined') {
+    document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/standalone/umd/vis-network.min.js"><\/script>');
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+/* =========================================================
+   Atlas — Crime & Case Graph Intelligence
+   High-Performance Forensic Investigation Dashboard
+   ========================================================= */
+
+// ---------- Theme Manager ----------
+function getInitialTheme() {
+  const saved = localStorage.getItem('atlas_theme');
+  if (saved) return saved;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('atlas_theme', theme);
+  updateThemeIcons(theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  if (state.network) {
+    // Re-render network for optimal node/font contrast
+    renderGraph();
+  }
+}
+
+function updateThemeIcons(theme) {
+  const sunSvg = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+  const moonSvg = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+  const icon = theme === 'dark' ? sunSvg : moonSvg;
+  const side = document.getElementById('themeIcon');
+  const top = document.getElementById('topThemeIcon');
+  if (side) side.innerHTML = icon;
+  if (top) top.innerHTML = icon;
+}
+
+// ---------- API Helper ----------
+const API = {
+  formatError(d, status) {
+    if (!d) return `HTTP ${status}`;
+    if (typeof d === 'string') return d;
+    if (d.detail) {
+      if (typeof d.detail === 'string') return d.detail;
+      if (Array.isArray(d.detail)) {
+        return d.detail.map(e => (e.loc ? e.loc.filter(l => l !== 'body').join('.') + ': ' : '') + e.msg).join('; ');
+      }
+      if (typeof d.detail === 'object') return d.detail.message || JSON.stringify(d.detail);
+    }
+    if (d.message) return d.message;
+    return `HTTP ${status}`;
+  },
+  async get(url) {
+    const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    let d;
+    try { d = await r.json(); } catch(e) { d = null; }
+    if (!r.ok) throw new Error(this.formatError(d, r.status));
+    return d;
+  },
+  async post(url, body = {}) {
+    return this.send(url, {
+      method: 'POST',
+      body: typeof body === 'string' ? body : JSON.stringify(body)
+    });
+  },
+  async put(url, body = {}) {
+    return this.send(url, {
+      method: 'PUT',
+      body: typeof body === 'string' ? body : JSON.stringify(body)
+    });
+  },
+  async send(url, opts = {}) {
+    const headers = opts.form ? {} : { 'Content-Type': 'application/json' };
+    if (opts.headers) Object.assign(headers, opts.headers);
+    const r = await fetch(url, { ...opts, headers });
+    let d;
+    try { d = await r.json(); } catch(e) { d = null; }
+    if (!r.ok) throw new Error(this.formatError(d, r.status));
+    return d;
+  },
+  async delete(url, body = null) {
+    const opts = { method: 'DELETE' };
+    if (body) {
+      opts.headers = { 'Content-Type': 'application/json' };
+      opts.body = JSON.stringify(body);
+    }
+    return this.send(url, opts);
+  }
+};
+
+// ---------- Toast Notifications ----------
+function toast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => {
+    t.classList.add('out');
+    setTimeout(() => t.remove(), 350);
+  }, type === 'err' ? 6500 : 3800);
+}
+
+// ---------- State ----------
+const state = {
+  view: 'overview',
+  health: null,
+  cases: [],
+  graphNodes: [],
+  graphEdges: [],
+  selectedCase: null,
+  rankings: {},
+  insights: [],
+  network: null,
+  charts: {}
+};
+
+// ---------- Navigation Config ----------
+const NAV = [
+  { id: 'overview', label: 'Command Center', icon: 'M4 13 9 4l5 9H4Zm6 0 5-8 5 8h-10Z' },
+  { id: 'graph', label: 'Graph Explorer', icon: 'M12 3a2 2 0 0 1 2 2c0 .4-.1.8-.3 1.1l3.4 5.4c.3-.1.6-.2.9-.2a2 2 0 1 1 0 4c-.3 0-.6-.1-.9-.2l-3.4 5.4c.2.3.3.7.3 1.1a2 2 0 1 1-3.6-1.1L8.9 15.5c-.3.1-.6.2-.9.2a2 2 0 1 1 0-4c.3 0 .6.1.8.2l3.4-5.4c-.2-.3-.3-.7-.3-1.1a2 2 0 0 1 2-2Z' },
+  { id: 'search', label: 'Entity Search', icon: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35' },
+  { id: 'path', label: 'Shortest Path', icon: 'M4 5h12m0 0-3-3m3 3-3 3M4 19h12m0 0-3-3m3 3-3 3M8 8v8' },
+  { id: 'rankings', label: 'Rankings', icon: 'M3 17l4-4 4 4 5-5 4 4' },
+  { id: 'insights', label: 'Pattern Insights', icon: 'M12 3l1.9 5.6L19 10l-5.1 1.9L12 17.5l-1.9-5.6L5 10l5.1-1.4L12 3Z' },
+  { id: 'blockchain', label: 'Chain of Custody', icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' },
+  { id: 'cases', label: 'Case Registry', icon: 'M3 7a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z' },
+  { id: 'ingest', label: 'Data Ingestion', icon: 'M12 5v14m-7-7h14' }
+];
+
+const TITLES = {
+  overview: ['Command Center', 'Ecosystem health metrics, top entities and active investigations'],
+  graph: ['Graph Explorer', 'Interactive topological network visualization'],
+  search: ['Entity Search', 'Fast multi-property search across people, phones, bank accounts, VINs'],
+  path: ['Shortest Path Analysis', 'Trace shortest association paths between suspect and victim'],
+  rankings: ['Centrality Rankings', 'Degree, PageRank, betweenness, and cross-case relevance'],
+  insights: ['Forensic Insights', 'Automated graph intelligence and anomaly detection'],
+  blockchain: ['Chain of Custody Ledger', 'Cryptographic SHA-256 Merkle block proof & anti-tampering evidence verification'],
+  cases: ['Case Registry', 'Manage cases, entity breakdowns, and case deletion'],
+  ingest: ['Data Ingestion', 'Ingest structured case JSON, CSV files, or raw narratives']
+};
+
+function buildNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = NAV.map(n => `
+    <button class="nav-item ${state.view === n.id ? 'active' : ''}" data-id="${n.id}" onclick="go('${n.id}')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${n.icon}"/></svg>
+      <span>${n.label}</span>
+    </button>
+  `).join('');
+}
+
+function go(id) {
+  if (!NAV.find(n => n.id === id)) return;
+  state.view = id;
+  closeSidebar();
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  document.getElementById('page-title').textContent = TITLES[id][0];
+  document.getElementById('page-sub').textContent = TITLES[id][1];
+  const v = document.getElementById('view');
+  v.classList.remove('fade-in');
+  void v.offsetWidth;
+  v.classList.add('fade-in');
+  renderView();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// ---------- View Renderer ----------
+function renderView() {
+  const v = document.getElementById('view');
+  switch (state.view) {
+    case 'overview': v.innerHTML = overviewView(); bindOverview(); break;
+    case 'graph': v.innerHTML = graphView(); bindGraph(); break;
+    case 'search': v.innerHTML = searchView(); bindSearch(); break;
+    case 'path': v.innerHTML = pathView(); break;
+    case 'rankings': v.innerHTML = rankingsView(); bindRankings(); break;
+    case 'insights': v.innerHTML = insightsView(); bindInsights(); break;
+    case 'blockchain': v.innerHTML = blockchainView(); bindBlockchain(); break;
+    case 'cases': v.innerHTML = casesView(); bindCases(); break;
+    case 'ingest': v.innerHTML = ingestView(); bindIngest(); break;
+  }
+}
+
+// ---------- Health Monitor ----------
+async function checkHealth() {
+  const pill = document.getElementById('statusPill');
+  if (!pill) return;
+  const dot = document.getElementById('statusDot'), txt = document.getElementById('statusText');
+  try {
+    const h = await API.get('/api/health');
+    dot.className = 'status-dot ok';
+    txt.innerHTML = `<span>${esc(h.database || 'neo4j')} · Neo4j ${esc(h.version || '')}</span><span class="status-meta">${Math.round(h.latency_ms)}ms</span>`;
+    state.health = h;
+  } catch (e) {
+    dot.className = 'status-dot bad';
+    txt.textContent = 'Service Offline';
+    state.health = null;
+  }
+  updateOverviewCards();
+}
+
+// ---------- Module: Overview ----------
+function renderOverviewCards() {
+  const c = state.cases || [];
+  const open = c.filter(x => String(x.status || 'OPEN').toUpperCase() !== 'CLOSED').length;
+  const totalEntities = c.reduce((s, x) => s + (x.total_entities || 0), 0);
+  const crit = (state.insights || []).filter(i => (i.severity || '').toUpperCase() === 'CRITICAL').length;
+  const isHealthy = state.health?.status === 'healthy';
+  const dbStatus = isHealthy ? 'Connected' : 'Offline';
+  const dbMeta = isHealthy
+    ? `<small>Neo4j ${esc(state.health?.version || 'Cluster')} · ${Math.round(state.health?.latency_ms || 0)}ms</small>`
+    : '<small>Reconnecting to database…</small>';
+  return `
+    ${statCard('Cases in Database', String(c.length), `<small>${open} active / open</small>`, 'rgba(0, 210, 255, 0.28)')}
+    ${statCard('Total Entities', String(totalEntities).toLocaleString(), '<small>indexed in graph</small>', 'rgba(99, 102, 241, 0.25)')}
+    ${statCard('Forensic Insights', String((state.insights || []).length), `<small>${crit} critical threats</small>`, 'rgba(245, 158, 11, 0.25)')}
+    ${statCard('Database State', dbStatus, dbMeta, isHealthy ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)')}
+  `;
+}
+
+function updateOverviewCards() {
+  const el = document.getElementById('overviewCards');
+  if (el) el.innerHTML = renderOverviewCards();
+}
+
+function overviewView() {
+  return `
+  <div class="cards-grid" id="overviewCards">
+    ${renderOverviewCards()}
+  </div>
+  <div class="cards-grid" style="grid-template-columns: 2fr 1fr;">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Entity Distribution by Type</div></div>
+      <div style="position:relative;height:270px"><canvas id="overviewChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Threat Severity Mix</div></div>
+      <div style="position:relative;height:270px"><canvas id="sevChart"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Active Investigations</div>
+        <div style="font-size:12px;color:var(--text-faint);margin-top:2px">Direct live stream from connected Neo4j knowledge graph</div>
+      </div>
+      <button class="neu-btn ghost" onclick="go('cases')">View all cases →</button>
+    </div>
+    <div id="recentCases">${renderRecentCases()}</div>
+  </div>`;
+}
+
+function statCard(label, value, foot, glow) {
+  return `<div class="stat-card" style="--glow:${glow}">
+    <div class="stat-label">${label}</div>
+    <div class="stat-value">${value}</div>
+    <div class="stat-foot">${foot || ''}</div>
+  </div>`;
+}
+
+function renderRecentCases() {
+  const c = (state.cases || []).slice(0, 6);
+  if (!c.length) {
+    return `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>
+      No cases registered yet. <a href="#" onclick="go('ingest');return false">Ingest case data to get started →</a>
+    </div>`;
+  }
+  return `<div class="tbl-wrap"><table>
+    <thead><tr><th>Case Name / ID</th><th>Type</th><th>Entities</th><th>Status</th><th></th></tr></thead>
+    <tbody>` +
+    c.map(x => `
+      <tr style="cursor:pointer" onclick="go('cases');openCase('${esc(x.case_id)}')">
+        <td>
+          <div style="font-weight:700;color:var(--text)">${esc(x.case_name || x.case_id)}</div>
+          <div class="mono" style="color:var(--text-faint)">${esc(x.case_id)}</div>
+        </td>
+        <td>${esc(x.case_type || '—')}</td>
+        <td class="mono">${x.total_entities}</td>
+        <td><span class="tag ${(x.status || 'open').toLowerCase().includes('close') ? 'closed' : 'open'}">${esc(x.status || 'OPEN')}</span></td>
+        <td style="text-align:right">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+        </td>
+      </tr>
+    `).join('') +
+    `</tbody></table></div>`;
+}
+
+async function bindOverview() {
+  await Promise.all([loadCases(), checkHealth()]);
+  updateOverviewCards();
+  const rc = document.getElementById('recentCases');
+  if (rc) rc.innerHTML = renderRecentCases();
+
+  // Load sample subgraph for distribution chart
+  try {
+    const g = await API.get('/api/graph?limit=500');
+    const counts = {};
+    (g.nodes || []).forEach(n => {
+      const l = n.labels[0] || 'Entity';
+      counts[l] = (counts[l] || 0) + 1;
+    });
+    drawChart('overviewChart', 'bar', Object.keys(counts), Object.values(counts));
+  } catch (e) {}
+
+  if (!state.insights.length && state.cases.length) {
+    try {
+      const topCases = state.cases.slice(0, 4);
+      const res = await Promise.all(topCases.map(c => API.get(`/api/cases/${encodeURIComponent(c.case_id)}/insights`).catch(() => [])));
+      state.insights = res.flat();
+      updateOverviewCards();
+    } catch (e) {}
+  }
+
+  const sev = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+  (state.insights || []).forEach(i => {
+    if (sev[i.severity] !== undefined) sev[i.severity]++;
+  });
+  drawChart('sevChart', 'doughnut', Object.keys(sev), Object.values(sev), ['#f43f5e', '#f59e0b', '#06b6d4', '#10b981']);
+}
+
+// ---------- Module: Graph Explorer ----------
+const LABEL_COLOR = {
+  Person: '#6366f1',
+  Phone: '#00d2ff',
+  BankAccount: '#10b981',
+  Vehicle: '#f59e0b',
+  SocialHandle: '#a855f7',
+  IPAddress: '#f43f5e',
+  Location: '#fb7185',
+  CellTower: '#14b8a6',
+  FIR: '#ec4899',
+  PriorCase: '#94a3b8',
+  Case: '#38bdf8',
+  Transaction: '#10b981',
+  SourceRecord: '#64748b',
+  Organization: '#3b82f6'
+};
+
+function getNodeLevel(labels) {
+  if (!labels || !labels.length) return 6;
+  if (labels.includes('Case')) return 1;
+  if (labels.includes('FIR') || labels.includes('PriorCase') || labels.includes('SourceRecord')) return 2;
+  if (labels.includes('Person')) return 3;
+  if (labels.some(l => ['Phone', 'BankAccount', 'Vehicle', 'SocialHandle'].includes(l))) return 4;
+  if (labels.includes('Transaction')) return 5;
+  return 6;
+}
+
+function getDeterministicSeed(str) {
+  let hash = 42;
+  const s = String(str || 'atlas_seed');
+  for (let i = 0; i < s.length; i++) {
+    hash = ((hash << 5) - hash) + s.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) || 42;
+}
+
+function graphView() {
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 3a2 2 0 0 1 2 2c0 .4-.1.8-.3 1.1l3.4 5.4c.3-.1.6-.2.9-.2a2 2 0 1 1 0 4c-.3 0-.6-.1-.9-.2l-3.4 5.4c.2.3.3.7.3 1.1a2 2 0 1 1-3.6-1.1L8.9 15.5c-.3.1-.6.2-.9.2a2 2 0 1 1 0-4c.3 0 .6.1.8.2l3.4-5.4c-.2-.3-.3-.7-.3-1.1a2 2 0 0 1 2-2Z"/></svg>
+        Network Topology Explorer
+      </div>
+      <div class="row" style="gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div class="field" style="min-width:180px">
+          <label>Case Filter</label>
+          <select class="control" id="gCase" onchange="loadGraph()">
+            <option value="">All Ingested Cases</option>
+            ${(state.cases || []).map(c => `<option value="${esc(c.case_id)}" ${state.selectedCase === c.case_id ? 'selected' : ''}>${esc(c.case_name || c.case_id)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field" style="min-width:180px">
+          <label>Layout Structure</label>
+          <select class="control" id="gLayout" onchange="renderGraph()">
+            <option value="structured" selected>🌟 Structured Organic (Reduced Bounce)</option>
+            <option value="hierarchy_ud">🌳 Hierarchical Flow (Top-to-Bottom)</option>
+            <option value="hierarchy_lr">🏛️ Pipeline Flow (Left-to-Right)</option>
+            <option value="radial">🎯 Central Core & Radial Orbit</option>
+          </select>
+        </div>
+        <div class="field" style="max-width:130px">
+          <label>Edge Labels</label>
+          <select class="control" id="gEdgeLabels" onchange="renderGraph()">
+            <option value="clean" selected>Clean (Hide INVOLVES)</option>
+            <option value="all">Show All</option>
+            <option value="none">No Edge Text</option>
+          </select>
+        </div>
+        <div class="field" style="max-width:110px">
+          <label>Limit</label>
+          <select class="control" id="gLimit" onchange="loadGraph()">
+            <option value="300">300</option>
+            <option value="600">600</option>
+            <option value="1200" selected>1200</option>
+            <option value="2500">2500</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <button class="neu-btn primary" id="gLoad" onclick="loadGraph()">Render</button>
+          <button class="neu-btn ghost" id="btnToggleAiCopilot" onclick="toggleGraphAiPanel()" title="Toggle Gemini AI Copilot Side Box" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+            <span id="aiCopilotBtnTxt">AI Copilot</span>
+          </button>
+          <button class="neu-btn ghost" id="gPhysicsBtn" onclick="togglePhysics()" title="Toggle or Pause Physics">
+            <span id="gPhysicsTxt">⏸ Pause</span>
+          </button>
+          <button class="neu-btn ghost" onclick="if(state.network)state.network.fit({animation:{duration:600}})" title="Fit Canvas">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fit
+          </button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap">
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-dim);cursor:pointer">
+        <input type="checkbox" id="gHideIsolated" onchange="renderGraph()" style="cursor:pointer">
+        Hide Isolated 1-Hop Pairs (Focus Connected Core)
+      </label>
+      <div style="font-size:12px;color:var(--text-faint)">
+        Drag nodes to inspect · Click any node or ask the Gemini Copilot on the right for inferences
+      </div>
+    </div>
+    <div id="graph">
+      <div id="graphLoading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--text-dim);background:var(--graph-bg);z-index:10">
+        <div class="status-dot" style="width:14px;height:14px;background:var(--accent);animation:pulse 1s infinite"></div>
+        <div style="font-size:13px">Generating graph layout…</div>
+      </div>
+      <div id="graphCanvas"></div>
+
+      <!-- Gemini AI Copilot Side Structure -->
+      <div id="graphAiPanel" class="graph-ai-box">
+        <div class="graph-ai-header">
+          <div style="display:flex;align-items:center;gap:7px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+            <span style="font-weight:700;font-size:13px;color:var(--text)">Gemini Copilot</span>
+            <span class="tag open" style="padding:1px 6px;font-size:9.5px;text-transform:uppercase">AI Inference</span>
+          </div>
+          <button class="neu-btn ghost" style="padding:2px 7px;font-size:11px" onclick="toggleGraphAiPanel()" title="Hide panel">✕</button>
+        </div>
+
+        <div class="graph-ai-body" id="graphAiChatLog">
+          <div class="ai-msg bot">
+            <div class="ai-msg-hdr">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+              <span>Atlas Graph Assistant</span>
+            </div>
+            <div>Can't get inferences from this visual topology? Ask me directly to identify key operatives, money flows, or hidden links.</div>
+            <div class="ai-quick-chips">
+              <button type="button" class="ai-chip" onclick="askAiCopilotPrompt('Who are the primary targets and kingpins?')">🎯 Who are the main targets?</button>
+              <button type="button" class="ai-chip" onclick="askAiCopilotPrompt('Explain the money flow and bank accounts')">💸 Money laundering flow</button>
+              <button type="button" class="ai-chip" onclick="askAiCopilotPrompt('Explain this graph topology in plain terms')">🔍 Summarize graph inference</button>
+              <button type="button" class="ai-chip" onclick="askAiCopilotPrompt('Are there any burner phones or communication loops?')">📱 Burner phone analysis</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="graph-ai-footer">
+          <form id="graphAiForm" onsubmit="handleGraphAiSubmit(event)" style="display:flex;gap:6px;width:100%;margin:0">
+            <input type="text" id="graphAiInput" class="control" style="font-size:12px;padding:7px 10px;flex:1" placeholder="Ask about this network…" autocomplete="off" />
+            <button type="submit" class="neu-btn primary" id="graphAiSubmitBtn" style="padding:0 12px;font-size:12px">Ask</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div id="graphStats" style="margin-top:14px;font-size:13px;color:var(--text-dim);font-family:var(--mono)"></div>
+  </div>
+  <div class="card" style="display:none" id="graphDetail">
+    <div class="card-header">
+      <div class="card-title">Entity Inspection</div>
+      <button class="neu-btn ghost" onclick="document.getElementById('graphDetail').style.display='none'">Close</button>
+    </div>
+    <div id="graphDetailBody"></div>
+  </div>`;
+}
+
+function togglePhysics() {
+  if (!state.network) return;
+  state.physicsEnabled = state.physicsEnabled === false ? true : false;
+  state.network.setOptions({ physics: { enabled: state.physicsEnabled } });
+  const txt = document.getElementById('gPhysicsTxt');
+  if (txt) txt.textContent = state.physicsEnabled ? '⏸ Pause' : '▶ Live Bounce';
+  toast(state.physicsEnabled ? 'Physics simulation resumed (reduced bounce)' : 'Physics locked into place', 'info');
+}
+
+async function bindGraph() {
+  if (!state.cases.length) await loadCases();
+  const select = document.getElementById('gCase');
+  if (select && state.cases.length) {
+    select.innerHTML = `<option value="">All Ingested Cases</option>` +
+      state.cases.map(c => `<option value="${esc(c.case_id)}" ${state.selectedCase === c.case_id ? 'selected' : ''}>${esc(c.case_name || c.case_id)}</option>`).join('');
+  }
+  await loadGraph();
+}
+
+async function loadGraph() {
+  const loading = document.getElementById('graphLoading');
+  const caseId = document.getElementById('gCase')?.value || state.selectedCase || '';
+  const limit = document.getElementById('gLimit')?.value || 1200;
+  const btn = document.getElementById('gLoad');
+  if (btn) { btn.disabled = true; btn.textContent = 'Rendering…'; }
+  if (loading) loading.style.display = 'flex';
+
+  try {
+    const g = await API.get(`/api/graph?limit=${limit}${caseId ? `&case_id=${encodeURIComponent(caseId)}` : ''}`);
+    state.graphNodes = g.nodes || [];
+    state.graphEdges = g.edges || [];
+    buildLegend();
+    renderGraph();
+    const st = document.getElementById('graphStats');
+    if (st) st.innerHTML = `Subnetwork: <b>${g.total_nodes}</b> nodes · <b>${g.total_edges}</b> edges · Seed: <span class="mono">${getDeterministicSeed(caseId || 'all')}</span>`;
+  } catch (e) {
+    toast(`Failed to load graph: ${e.message}`, 'err');
+  } finally {
+    if (loading) loading.style.display = 'none';
+    if (btn) { btn.disabled = false; btn.textContent = 'Render'; }
+  }
+}
+
+function buildLegend(visibleNodes = null) {
+  const l = document.getElementById('legend');
+  if (!l) return;
+  const counts = {};
+  const list = visibleNodes || state.graphNodes || [];
+  list.forEach(n => {
+    const lab = (n.labels && n.labels[0]) || 'Entity';
+    counts[lab] = (counts[lab] || 0) + 1;
+  });
+  l.innerHTML = Object.entries(counts).map(([k, v]) => `
+    <div class="lg">
+      <span class="dot" style="background:${LABEL_COLOR[k] || '#94a3b8'}"></span>
+      <b>${k}</b> <span class="mono">(${v})</span>
+    </div>
+  `).join('');
+}
+
+function renderGraph() {
+  const container = document.getElementById('graphCanvas');
+  if (!container) return;
+  if (typeof vis === 'undefined' || !vis.Network) {
+    container.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;color:var(--red)">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:12px;opacity:0.8"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <h3 style="font-size:16px;font-weight:700">Visualization Library (vis-network) Failed to Load</h3>
+        <p style="margin-top:8px;font-size:13px;color:var(--text-dim);max-width:450px;line-height:1.5">
+          The browser could not load the <code>vis-network</code> library from the CDN. Check your internet connection or ad-blocker settings.
+        </p>
+      </div>`;
+    throw new Error('vis is not defined (CDN script blocked or unavailable)');
+  }
+  if (state.network && state.network.destroy) {
+    state.network.destroy();
+    state.network = null;
+  }
+
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const textColor = isLight ? '#0f172a' : '#cbd5e1';
+  const edgeColor = isLight ? 'rgba(51, 65, 85, 0.45)' : 'rgba(148, 163, 184, 0.4)';
+  const caseId = document.getElementById('gCase')?.value || state.selectedCase || 'all_cases';
+  const layoutType = document.getElementById('gLayout')?.value || 'structured';
+  const edgeLabelMode = document.getElementById('gEdgeLabels')?.value || 'clean';
+  const hideIsolated = document.getElementById('gHideIsolated')?.checked || false;
+
+  // Compute node degrees for isolated filter
+  const degrees = {};
+  (state.graphEdges || []).forEach(e => {
+    degrees[e.source] = (degrees[e.source] || 0) + 1;
+    degrees[e.target] = (degrees[e.target] || 0) + 1;
+  });
+
+  const seenNodeIds = new Set();
+  const nodes = [];
+  (state.graphNodes || []).forEach(n => {
+    if (!n || !n.id || seenNodeIds.has(n.id)) return;
+
+    // Filter isolated 1-hop or disconnected nodes if option enabled
+    if (hideIsolated && (degrees[n.id] || 0) <= 1 && !n.labels?.includes('Case')) {
+      return;
+    }
+
+    seenNodeIds.add(n.id);
+    const isCase = n.labels?.includes('Case');
+    const isPerson = n.labels?.includes('Person');
+    const lvl = getNodeLevel(n.labels);
+
+    nodes.push({
+      id: n.id,
+      label: n.name || n.id,
+      level: lvl,
+      title: `${n.labels?.[0] || 'Node'}: ${n.name || n.id}\nID: ${n.id}`,
+      shape: 'dot',
+      size: isCase ? 22 : (isPerson ? 16 : 12),
+      color: {
+        background: LABEL_COLOR[n.labels?.[0]] || '#94a3b8',
+        border: isLight ? '#ffffff' : '#070a12',
+        highlight: { background: '#00d2ff', border: '#ffffff' }
+      },
+      font: {
+        color: textColor,
+        size: isCase ? 14 : (isPerson ? 12 : 10),
+        face: 'Inter',
+        strokeWidth: isLight ? 2 : 0,
+        strokeColor: isLight ? '#ffffff' : 'transparent'
+      }
+    });
+  });
+
+  const seenEdgeIds = new Set();
+  const edges = [];
+  (state.graphEdges || []).forEach((e, idx) => {
+    if (!e || !e.source || !e.target) return;
+    if (!seenNodeIds.has(e.source) || !seenNodeIds.has(e.target)) return;
+
+    let edgeId = String(e.id || `edge_${e.source}_${e.type}_${e.target}_${idx}`);
+    if (seenEdgeIds.has(edgeId)) edgeId = `${edgeId}_${idx}`;
+    seenEdgeIds.add(edgeId);
+
+    const isCaseLink = e.type === 'INVOLVES';
+    let label = e.type || '';
+    if (edgeLabelMode === 'none') {
+      label = '';
+    } else if (edgeLabelMode === 'clean' && isCaseLink) {
+      label = ''; // Hide repetitive INVOLVES text to avoid clutter
+    }
+
+    edges.push({
+      id: edgeId,
+      from: e.source,
+      to: e.target,
+      label: label,
+      title: `${e.type || 'LINK'} (${e.source} → ${e.target})`,
+      arrows: 'to',
+      color: {
+        color: isCaseLink ? (isLight ? 'rgba(2, 132, 199, 0.35)' : 'rgba(0, 210, 255, 0.35)') : edgeColor,
+        highlight: '#00d2ff',
+        hover: '#00d2ff'
+      },
+      dashes: isCaseLink,
+      font: {
+        color: isLight ? '#475569' : '#94a3b8',
+        size: 9,
+        face: 'Inter',
+        strokeWidth: 0,
+        background: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(12, 17, 30, 0.85)'
+      },
+      smooth: { enabled: true, type: 'continuous', roundness: 0.35 }
+    });
+  });
+
+  const seed = getDeterministicSeed(caseId);
+  let layoutOpts = { randomSeed: seed };
+  let physicsOpts = {};
+
+  if (layoutType === 'hierarchy_ud') {
+    layoutOpts.hierarchical = {
+      enabled: true,
+      direction: 'UD',
+      sortMethod: 'directed',
+      levelSeparation: 140,
+      nodeSpacing: 160,
+      treeSpacing: 220,
+      blockShifting: true,
+      edgeMinimization: true,
+      parentCentralization: true
+    };
+    physicsOpts = {
+      enabled: state.physicsEnabled !== false,
+      solver: 'hierarchicalRepulsion',
+      hierarchicalRepulsion: {
+        nodeDistance: 150,
+        centralGravity: 0.0,
+        springLength: 120,
+        springConstant: 0.04,
+        damping: 0.48
+      },
+      stabilization: { iterations: 140 }
+    };
+  } else if (layoutType === 'hierarchy_lr') {
+    layoutOpts.hierarchical = {
+      enabled: true,
+      direction: 'LR',
+      sortMethod: 'directed',
+      levelSeparation: 170,
+      nodeSpacing: 140,
+      treeSpacing: 200,
+      blockShifting: true,
+      edgeMinimization: true,
+      parentCentralization: true
+    };
+    physicsOpts = {
+      enabled: state.physicsEnabled !== false,
+      solver: 'hierarchicalRepulsion',
+      hierarchicalRepulsion: {
+        nodeDistance: 140,
+        centralGravity: 0.0,
+        springLength: 120,
+        springConstant: 0.04,
+        damping: 0.48
+      },
+      stabilization: { iterations: 140 }
+    };
+  } else if (layoutType === 'radial') {
+    layoutOpts.improvedLayout = true;
+    physicsOpts = {
+      enabled: state.physicsEnabled !== false,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: {
+        gravitationalConstant: -70,
+        centralGravity: 0.04,
+        springLength: 150,
+        springConstant: 0.08,
+        damping: 0.55,
+        avoidOverlap: 0.85
+      },
+      stabilization: { iterations: 160 }
+    };
+  } else {
+    // 'structured' (Default - Smooth Elastic ForceAtlas2 with Reduced Bounce)
+    layoutOpts.improvedLayout = true;
+    physicsOpts = {
+      enabled: state.physicsEnabled !== false,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: {
+        gravitationalConstant: -55,
+        centralGravity: 0.015,
+        springLength: 160,
+        springConstant: 0.07,
+        damping: 0.52, // Key: High damping rapidly dissipates jitter, giving a smooth controlled bounce
+        avoidOverlap: 0.90 // Prevents node/text overlap
+      },
+      stabilization: { iterations: 180 }
+    };
+  }
+
+  const data = { nodes, edges };
+  const opts = {
+    layout: layoutOpts,
+    physics: physicsOpts,
+    nodes: { borderWidth: 2 },
+    edges: { width: 1.4 },
+    interaction: { hover: true, tooltipDelay: 100, navigationButtons: true, keyboard: true }
+  };
+
+  state.network = new vis.Network(container, data, opts);
+  buildLegend(nodes);
+  const st = document.getElementById('graphStats');
+  if (st) {
+    const totalG = state.graphNodes?.length || nodes.length;
+    st.innerHTML = `Displaying: <b>${nodes.length}</b> nodes · <b>${edges.length}</b> edges ${nodes.length < totalG ? `<span style="color:var(--amber);margin-left:4px">(Filtered from ${totalG} total)</span>` : ''} · Seed: <span class="mono">${seed}</span>`;
+  }
+  state.network.on('click', p => {
+    if (p.nodes && p.nodes.length) {
+      openNodeDetail(p.nodes[0]);
+    }
+  });
+}
+
+function openNodeDetail(id) {
+  const node = state.graphNodes.find(n => n.id === id);
+  if (!node) return;
+  const body = document.getElementById('graphDetailBody');
+  document.getElementById('graphDetail').style.display = 'block';
+  const p = node.properties || {};
+  const keys = Object.keys(p).filter(k => !['case_ids', 'created_at', 'updated_at'].includes(k));
+  const kv = keys.slice(0, 12).map(k => `
+    <div><div class="k">${esc(k)}</div><div class="v mono">${esc(p[k])}</div></div>
+  `).join('') || '<div style="grid-column:1/-1;color:var(--text-faint)">No stored properties</div>';
+
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <span class="dot" style="width:14px;height:14px;background:${LABEL_COLOR[node.labels[0]] || '#94a3b8'};border-radius:50%"></span>
+      <div>
+        <div style="font-weight:700;font-size:16px">${esc(node.name)}</div>
+        <div class="mono" style="color:var(--text-faint);font-size:12px">${esc(node.id)}</div>
+      </div>
+      <span style="margin-left:auto" class="tag plain">${node.labels.join(', ')}</span>
+    </div>
+    <div class="kv">${kv}</div>
+    <div style="margin-top:18px;display:flex;gap:10px">
+      <button class="neu-btn primary" onclick="openEntity('${esc(node.id)}')">View Full 360° Profile</button>
+      <button class="neu-btn ghost" onclick="askAiCopilotPrompt('Analyze the connections and risk profile of entity ${esc(node.name || node.id)}')">✨ Ask Copilot</button>
+    </div>`;
+  state.selectedNodeId = id;
+}
+
+// ---------- Module: AI Graph Copilot (Side Box) ----------
+function toggleGraphAiPanel() {
+  const panel = document.getElementById('graphAiPanel');
+  const btnTxt = document.getElementById('aiCopilotBtnTxt');
+  if (!panel) return;
+  panel.classList.toggle('collapsed');
+  const isHidden = panel.classList.contains('collapsed');
+  if (btnTxt) btnTxt.textContent = isHidden ? 'Show Copilot' : 'AI Copilot';
+  setTimeout(() => {
+    if (state.network) state.network.redraw();
+  }, 250);
+}
+
+function askAiCopilotPrompt(question) {
+  const panel = document.getElementById('graphAiPanel');
+  if (panel && panel.classList.contains('collapsed')) {
+    toggleGraphAiPanel();
+  }
+  const input = document.getElementById('graphAiInput');
+  if (input) input.value = question;
+  handleGraphAiSubmit(new Event('submit'));
+}
+
+async function handleGraphAiSubmit(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('graphAiInput');
+  const log = document.getElementById('graphAiChatLog');
+  const btn = document.getElementById('graphAiSubmitBtn');
+  if (!input || !log) return;
+  const q = input.value.trim();
+  if (!q) return;
+
+  // Add user message bubble
+  input.value = '';
+  const userDiv = document.createElement('div');
+  userDiv.className = 'ai-msg user';
+  userDiv.textContent = q;
+  log.appendChild(userDiv);
+  log.scrollTop = log.scrollHeight;
+
+  // Add loading placeholder
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'ai-msg bot';
+  loadingDiv.id = 'aiMsgLoading';
+  loadingDiv.innerHTML = `
+    <div class="ai-msg-hdr">
+      <div class="status-dot" style="width:8px;height:8px;background:var(--accent);animation:pulse 1s infinite"></div>
+      <span>Gemini is analyzing topology…</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--text-faint)">Correlating nodes, transactions, and hidden links</div>
+  `;
+  log.appendChild(loadingDiv);
+  log.scrollTop = log.scrollHeight;
+
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+  const caseId = document.getElementById('gCase')?.value || state.selectedCase || '';
+  try {
+    const res = await API.post('/api/graph/ai-query', {
+      question: q,
+      case_id: caseId || null,
+      nodes_count: state.graphNodes?.length || null,
+      edges_count: state.graphEdges?.length || null,
+      selected_node_id: state.selectedNodeId || null
+    });
+
+    const loadEl = document.getElementById('aiMsgLoading');
+    if (loadEl) loadEl.remove();
+
+    const botDiv = document.createElement('div');
+    botDiv.className = 'ai-msg bot';
+    
+    // Parse formatting: bold **word** -> <b>word</b> and bullet lines
+    let formatted = esc(res.answer || 'No specific inference generated.')
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/^• (.*?)$/gm, '<div style="margin-bottom:6px;display:flex;gap:6px"><span style="color:var(--accent);font-weight:700">•</span><span>$1</span></div>')
+      .replace(/\n\n/g, '<div style="height:6px"></div>');
+
+    botDiv.innerHTML = `
+      <div class="ai-msg-hdr">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+        <span>${esc(res.ai_model || 'Gemini 2.5 Flash')}</span>
+      </div>
+      <div>${formatted}</div>
+    `;
+    log.appendChild(botDiv);
+  } catch (err) {
+    const loadEl = document.getElementById('aiMsgLoading');
+    if (loadEl) loadEl.remove();
+    const errDiv = document.createElement('div');
+    errDiv.className = 'ai-msg bot';
+    errDiv.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+    errDiv.innerHTML = `<div style="color:var(--red)">Inference query error: ${esc(err.message)}</div>`;
+    log.appendChild(errDiv);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Ask'; }
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+// ---------- Module: Entity Search ----------
+function searchView() {
+  return `
+  <div class="card">
+    <div class="card-header"><div class="card-title">Entity Knowledge Search</div></div>
+    <div class="row" style="align-items:flex-end">
+      <div class="field" style="flex:2">
+        <label>Search Query</label>
+        <input class="control" id="sQ" placeholder="Enter name, phone (+91...), account number, VIN, license plate, or handle…" onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+      <div class="field" style="max-width:200px">
+        <label>Entity Category</label>
+        <select class="control" id="sType">
+          <option value="">All Categories</option>
+          ${['Person','Phone','BankAccount','Vehicle','SocialHandle','IPAddress','Location','CellTower','Case','FIR'].map(t=>`<option>${t}</option>`).join('')}
+        </select>
+      </div>
+      <button class="neu-btn primary" onclick="doSearch()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35"/></svg>
+        Search
+      </button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Search Results</div>
+      <span class="tag plain" id="sCount">0 matches</span>
+    </div>
+    <div id="sResults">
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35"/></svg>
+        Execute a search query above to inspect entity profiles.
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindSearch() {}
+
+async function doSearch() {
+  const q = document.getElementById('sQ').value.trim();
+  if (!q) { toast('Please specify a search query', 'info'); return; }
+  const type = document.getElementById('sType').value;
+  const box = document.getElementById('sResults');
+  box.innerHTML = `<div class="skeleton sk-row"></div><div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>`;
+
+  try {
+    const res = await API.get(`/api/entities/search?q=${encodeURIComponent(q)}${type ? `&entity_type=${type}` : ''}&limit=50`);
+    document.getElementById('sCount').textContent = `${res.length} matches`;
+    if (!res.length) {
+      box.innerHTML = `<div class="empty">No entity matches found for "${esc(q)}". Try searching by partial name or number.</div>`;
+      return;
+    }
+    box.innerHTML = res.map(r => `
+      <div class="result-item" onclick="openEntity('${esc(r.entity_id)}')">
+        <div class="result-main">
+          <div class="result-name">${esc(r.display_name || r.entity_id)}</div>
+          <div class="result-sub mono">${esc(r.entity_id)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="tag plain">${r.labels.slice(0, 3).join(', ')}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:var(--red)">${esc(e.message)}</div>`;
+  }
+}
+
+async function openEntity(id) {
+  try {
+    const e = await API.get(`/api/entities/${encodeURIComponent(id)}`);
+    openModal(entityModal(e));
+  } catch (err) {
+    toast(`Could not load entity: ${err.message}`, 'err');
+  }
+}
+
+function entityModal(e) {
+  const p = e.properties || {};
+  const keys = Object.keys(p).filter(k => !['case_ids', 'created_at', 'updated_at'].includes(k));
+  const kv = keys.map(k => `
+    <div><div class="k">${esc(k)}</div><div class="v mono">${esc(typeof p[k] === 'object' ? JSON.stringify(p[k]) : p[k])}</div></div>
+  `).join('');
+
+  const conns = (e.connections || []).map(c => `
+    <div class="result-item" style="cursor:default">
+      <div class="result-main">
+        <div class="result-name">${esc(c.neighbor_name || c.neighbor_id)}</div>
+        <div class="result-sub">${c.direction === 'OUTGOING' ? '→ OUTGOING' : '← INCOMING'} · <span class="tag plain">${esc(c.relationship)}</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="tag plain">${(c.neighbor_labels || []).join(', ')}</span>
+        <button class="neu-btn ghost" style="padding:4px 8px;font-size:11px" onclick="closeModal();openEntity('${esc(c.neighbor_id)}')">Inspect</button>
+      </div>
+    </div>
+  `).join('') || '<div class="empty">No direct 1-hop connections registered.</div>';
+
+  return `
+    <button class="close neu-btn ghost" onclick="closeModal()" style="float:right">✕</button>
+    <h3>${esc(e.labels?.[0] || 'Entity')} · ${esc(e.entity_id)}</h3>
+    <div style="display:flex;gap:18px;align-items:center;margin-bottom:18px">
+      <div class="stat-card" style="min-width:130px;padding:14px;--glow:rgba(0, 210, 255, 0.2)">
+        <div class="stat-value" style="font-size:24px">${e.total_connections}</div>
+        <div class="stat-label">Direct Connections</div>
+      </div>
+      <div style="font-size:13px;color:var(--text-dim)">
+        Full entity record with immediate 1-hop associations across all linked investigation files.
+      </div>
+    </div>
+    <div style="font-weight:700;font-size:14px;margin:12px 0 6px">Stored Attributes</div>
+    <div class="kv">${kv || '<div style="grid-column:1/-1;color:var(--text-faint)">No attributes available</div>'}</div>
+    <div style="font-weight:700;font-size:14px;margin:20px 0 8px">Connected Entities (${e.total_connections})</div>
+    ${conns}`;
+}
+
+// ---------- Module: Shortest Path ----------
+function pathView() {
+  return `
+  <div class="card">
+    <div class="card-header"><div class="card-title">Trace Association Path</div></div>
+    <div class="row" style="align-items:flex-end">
+      <div class="field">
+        <label>Suspect (Name or ID)</label>
+        <input class="control" id="pSuspect" placeholder="e.g. Devendra Sharma or P-001">
+      </div>
+      <div class="field">
+        <label>Victim (Name or ID)</label>
+        <input class="control" id="pVictim" placeholder="e.g. Rajesh Kumar or P-002">
+      </div>
+      <div class="field" style="max-width:130px">
+        <label>Max Hops</label>
+        <select class="control" id="pDepth">
+          ${[2,3,5,7,10,15].map(d => `<option value="${d}" ${d===5?'selected':''}>${d} hops</option>`).join('')}
+        </select>
+      </div>
+      <button class="neu-btn primary" onclick="doPath()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-4-4m4 4-4 4"/></svg>
+        Trace Path
+      </button>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-faint)">
+      Ambiguity safe: if a name resolves to multiple persons, the system presents candidate keys for disambiguation.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Path Traversal Result</div></div>
+    <div id="pResult">
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 5h12m0 0-3-3m3 3-3 3M4 19h12m0 0-3-3m3 3-3 3M8 8v8"/></svg>
+        Enter suspect and victim identifiers to compute graph connectivity.
+      </div>
+    </div>
+  </div>`;
+}
+
+async function doPath(sOverride = null, vOverride = null) {
+  const s = sOverride || document.getElementById('pSuspect').value.trim();
+  const v = vOverride || document.getElementById('pVictim').value.trim();
+  const d = document.getElementById('pDepth').value;
+  const box = document.getElementById('pResult');
+
+  if (!s || !v) { toast('Specify both suspect and victim', 'info'); return; }
+  box.innerHTML = `<div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>`;
+
+  // Auto-detect whether input is a person_id or name
+  const sParam = s.toUpperCase().startsWith('P-') || s.toUpperCase().startsWith('PERSON_') ? `suspect_id=${encodeURIComponent(s)}` : `suspect_name=${encodeURIComponent(s)}`;
+  const vParam = v.toUpperCase().startsWith('P-') || v.toUpperCase().startsWith('PERSON_') ? `victim_id=${encodeURIComponent(v)}` : `victim_name=${encodeURIComponent(v)}`;
+
+  try {
+    const res = await API.get(`/api/cases/shortest-path?${sParam}&${vParam}&max_depth=${d}`);
+    if (res.ambiguous) {
+      box.innerHTML = `
+        <div style="max-width:640px;margin:0 auto;text-align:left">
+          <div style="color:var(--amber);font-weight:700;font-size:15px;margin-bottom:8px">
+            ⚠ Ambiguity Detected — Multiple Entities Matched
+          </div>
+          <p style="font-size:13.5px;color:var(--text-dim);margin-bottom:14px">${esc(res.message)}</p>
+          <div style="font-size:12px;color:var(--text-faint);margin-bottom:10px;text-transform:uppercase;font-weight:700">Matching Candidates:</div>
+          ${(res.candidates || []).map(c => `
+            <div class="result-item" style="cursor:default">
+              <div class="result-main">
+                <div class="result-name">${esc(c.name)} <span class="mono" style="color:var(--text-faint);font-size:12px">(${esc(c.person_id)})</span></div>
+                <div class="result-sub">DOB: ${esc(c.dob || '—')} · Cases: ${(c.case_ids || []).join(', ')}</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="neu-btn ghost" style="padding:4px 8px;font-size:11.5px" onclick="document.getElementById('pSuspect').value='${esc(c.person_id)}';doPath('${esc(c.person_id)}', null)">Use as Suspect</button>
+                <button class="neu-btn ghost" style="padding:4px 8px;font-size:11.5px" onclick="document.getElementById('pVictim').value='${esc(c.person_id)}';doPath(null, '${esc(c.person_id)}')">Use as Victim</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+      return;
+    }
+    box.innerHTML = renderPath(res);
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:var(--red)">${esc(e.message)}</div>`;
+  }
+}
+
+function renderPath(res) {
+  if (!res.nodes || !res.nodes.length) {
+    return `<div class="empty">${esc(res.summary || 'No association path found between entities within depth limit.')}</div>`;
+  }
+  const steps = res.nodes.map((n, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border:1px solid var(--border);border-radius:12px;background:var(--surface)">
+      <span class="dot" style="width:12px;height:12px;background:${LABEL_COLOR[n.labels?.[0]] || '#94a3b8'};border-radius:50%"></span>
+      <div style="flex:1">
+        <div style="font-weight:700;color:var(--text);font-size:14px">${esc(n.name || n.id)}</div>
+        <div class="mono" style="color:var(--text-faint);font-size:11.5px">${esc(n.id)} · ${n.labels?.join(', ') || 'Entity'}</div>
+      </div>
+      <button class="neu-btn ghost" style="padding:4px 8px;font-size:11px" onclick="openEntity('${esc(n.id)}')">Inspect</button>
+    </div>
+  `);
+
+  const pathHtml = steps.map((s, i) => `
+    ${s}
+    ${i < steps.length - 1 ? `
+      <div style="display:flex;align-items:center;justify-content:center;margin:4px 0;color:var(--accent)">
+        <span style="font-size:18px">↓</span>
+        ${res.relationships && res.relationships[i] ? `<span class="tag plain mono" style="margin-left:8px">${esc(res.relationships[i].type)}</span>` : ''}
+      </div>` : ''}
+  `).join('');
+
+  return `
+    <div style="max-width:600px;margin:0 auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <span class="tag open">${res.path_length} Hop Connection</span>
+        <span style="font-size:12.5px;color:var(--text-dim)">${esc(res.summary || '')}</span>
+      </div>
+      ${pathHtml}
+    </div>`;
+}
+
+// ---------- Module: Centrality Rankings ----------
+function rankingsView() {
+  return `
+  <div class="card">
+    <div class="card-header"><div class="card-title">Ranking Analysis Configuration</div></div>
+    <div class="row" style="align-items:flex-end">
+      <div class="field" style="max-width:200px">
+        <label>Centrality Metric</label>
+        <select class="control" id="rMetric">
+          <option value="degree">Degree Centrality</option>
+          <option value="weighted_degree">Weighted Degree</option>
+          <option value="cross_case_relevance">Cross-Case Relevance</option>
+          <option value="pagerank">PageRank</option>
+          <option value="betweenness">Betweenness Centrality</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:180px">
+        <label>Entity Category</label>
+        <select class="control" id="rLabel">
+          ${['Person','Phone','BankAccount','Vehicle','SocialHandle','IPAddress','Location','CellTower'].map(t=>`<option>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" style="max-width:180px">
+        <label>Case Filter</label>
+        <select class="control" id="rCase">
+          <option value="">All Cases (Global)</option>
+          ${(state.cases || []).map(c => `<option value="${esc(c.case_id)}">${esc(c.case_name || c.case_id)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" style="max-width:110px">
+        <label>Limit</label>
+        <input class="control" id="rLimit" type="number" value="15" min="1" max="100">
+      </div>
+      <button class="neu-btn primary" onclick="doRankings()">Calculate</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title" id="rTitle">Centrality Leaderboard</div>
+      <span class="tag plain" id="rCount">0 Ranked</span>
+    </div>
+    <div id="rResults">
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 17l4-4 4 4 5-5 4 4"/></svg>
+        Select parameters above to evaluate influential network nodes.
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindRankings() {
+  if (state.cases.length) {
+    const rc = document.getElementById('rCase');
+    if (rc) {
+      rc.innerHTML = `<option value="">All Cases (Global)</option>` +
+        state.cases.map(c => `<option value="${esc(c.case_id)}">${esc(c.case_name || c.case_id)}</option>`).join('');
+    }
+  }
+}
+
+async function doRankings() {
+  const metric = document.getElementById('rMetric').value;
+  const label = document.getElementById('rLabel').value;
+  const caseId = document.getElementById('rCase').value;
+  const limit = document.getElementById('rLimit').value || 15;
+  const box = document.getElementById('rResults');
+  const title = document.getElementById('rTitle');
+
+  box.innerHTML = `<div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>`;
+
+  try {
+    const url = `/api/cases/rankings?metric=${metric}&label=${label}&limit=${limit}${caseId ? `&case_id=${encodeURIComponent(caseId)}` : ''}`;
+    const r = await API.get(url);
+    document.getElementById('rCount').textContent = `${r.total_ranked} ranked`;
+    title.textContent = `Rankings: ${metric.replace(/_/g, ' ').toUpperCase()}`;
+
+    if (!r.rankings || !r.rankings.length) {
+      box.innerHTML = `<div class="empty">Data not found</div>`;
+      return;
+    }
+
+    const max = r.rankings[0]?.score || 1;
+    box.innerHTML = r.rankings.map((it, i) => `
+      <div class="list-row">
+        <div style="display:flex;align-items:center;gap:14px;flex:1">
+          <div style="width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;
+            ${i===0 ? 'background:var(--accent-gradient);color:#fff' : i===1 ? 'background:rgba(99,102,241,0.25);color:var(--text)' : i===2 ? 'background:rgba(245,158,11,0.25);color:var(--text)' : 'background:var(--surface-hover);color:var(--text-dim)'}">
+            ${i + 1}
+          </div>
+          <div>
+            <div class="l-name">${esc(it.name || it.id)}</div>
+            <div class="l-sub mono">${esc(it.id)} · ${(it.case_ids || []).join(', ')}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;min-width:200px">
+          <div style="flex:1;height:8px;border-radius:6px;background:var(--bg1);overflow:hidden;border:1px solid var(--border)">
+            <div style="height:100%;width:${Math.max(5, (it.score / max) * 100)}%;background:var(--accent-gradient);border-radius:6px"></div>
+          </div>
+          <span class="mono" style="font-weight:700;color:var(--text);min-width:48px;text-align:right">${Number(it.score).toFixed(it.score < 10 ? 2 : 0)}</span>
+          <button class="neu-btn ghost" style="padding:3px 8px;font-size:11px" onclick="openEntity('${esc(it.id)}')">Profile</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    const isGds = e.message && (e.message.includes('GDS') || e.message.includes('Graph Data Science'));
+    box.innerHTML = `<div class="empty" style="color:var(--text-dim)">${isGds ? 'Data not found' : esc(e.message)}</div>`;
+  }
+}
+
+// ---------- Module: Pattern Insights ----------
+function insightsView() {
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Automated Forensic Detectors</div>
+      <div class="row" style="gap:10px;flex-wrap:wrap">
+        <div class="field" style="min-width:200px">
+          <select class="control" id="iCase" onchange="bindInsights()">
+            <option value="">All Ingested Cases</option>
+            <option value="__DELTA__">Cross-Case Delta Insights Only</option>
+            ${(state.cases || []).map(c => `<option value="${esc(c.case_id)}">Case: ${esc(c.case_name || c.case_id)}</option>`).join('')}
+          </select>
+        </div>
+        <select class="control" id="iSev" style="max-width:160px" onchange="filterInsights()">
+          <option value="">All Severities</option>
+          <option value="CRITICAL">CRITICAL</option>
+          <option value="HIGH">HIGH</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="LOW">LOW</option>
+        </select>
+        <button class="neu-btn primary" onclick="triggerCaseAIDossierFromInsights()" style="display:inline-flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+          ✨ Gemini AI Dossier
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="insightResults"><div class="skeleton sk-row"></div><div class="skeleton sk-row"></div></div>`;
+}
+
+async function bindInsights() {
+  const box = document.getElementById('insightResults');
+  if (!box) return;
+  if (!state.cases.length) await loadCases();
+
+  const caseSelect = document.getElementById('iCase');
+  const selVal = caseSelect?.value || '';
+  box.innerHTML = `<div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>`;
+
+  try {
+    let list = [];
+    if (selVal === '__DELTA__') {
+      list = await API.get('/api/insights/delta');
+    } else if (selVal) {
+      list = await API.get(`/api/cases/${encodeURIComponent(selVal)}/insights`);
+    } else {
+      const allResults = await Promise.all(
+        state.cases.map(c => API.get(`/api/cases/${encodeURIComponent(c.case_id)}/insights`).catch(() => []))
+      );
+      list = allResults.flat();
+      // Deduplicate insights by insight_id
+      const seen = new Set();
+      list = list.filter(i => {
+        if (!i.insight_id || seen.has(i.insight_id)) return false;
+        seen.add(i.insight_id);
+        return true;
+      });
+    }
+    state.insights = list;
+    filterInsights();
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:var(--red)">${esc(e.message)}</div>`;
+  }
+}
+
+function filterInsights() {
+  const sev = document.getElementById('iSev')?.value;
+  const all = state.insights || [];
+  renderInsightCards(sev ? all.filter(i => (i.severity || '').toUpperCase() === sev) : all);
+}
+
+function renderInsightCards(list) {
+  const box = document.getElementById('insightResults');
+  if (!box) return;
+  if (!list.length) {
+    box.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l1.9 5.6L19 10l-5.1 1.9L12 17.5l-1.9-5.6L5 10l5.1-1.4L12 3Z"/></svg>
+      No pattern insights match the selected filter. Ingest additional cases or communications to trigger detection.
+    </div>`;
+    return;
+  }
+
+  box.innerHTML = `<div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">` +
+    list.map((i, idx) => {
+      const sev = (i.severity || 'MEDIUM').toUpperCase();
+      const sevClass = sev === 'CRITICAL' ? 'crit' : sev === 'HIGH' ? 'high' : sev === 'MEDIUM' ? 'med' : 'low';
+      return `
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">
+          <span class="tag ${sevClass}">${sev}</span>
+          <span class="mono" style="font-size:11px;color:var(--text-faint)">${esc(i.insight_type)}</span>
+        </div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:var(--text)">${esc(i.title)}</div>
+        <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;flex:1;line-height:1.5">${esc(i.derived_interpretation)}</div>
+        ${(i.observed_facts || []).slice(0, 2).map(f => `
+          <div style="font-size:12px;color:var(--text-faint);display:flex;gap:6px;margin-bottom:4px">
+            <span style="color:var(--accent)">●</span> ${esc(f)}
+          </div>
+        `).join('')}
+        <div style="margin-top:14px;display:flex;gap:6px;flex-wrap:wrap">
+          ${(i.case_ids || []).map(c => `<span class="tag plain mono">${esc(c)}</span>`).join('')}
+        </div>
+        <button class="neu-btn ghost" style="margin-top:14px;width:100%" onclick="openInsightModal(${idx})">Examine Evidence</button>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function openInsightModal(idx) {
+  const i = state.insights[idx];
+  if (!i) return;
+  openModal(`
+    <button class="close neu-btn ghost" onclick="closeModal()" style="float:right">✕</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span class="tag ${(i.severity||'med').toLowerCase()}">${esc(i.severity)}</span>
+      <span class="tag plain mono">${esc(i.insight_type)} · ${esc(i.insight_id)}</span>
+    </div>
+    <h3>${esc(i.title)}</h3>
+    <div style="font-size:14.5px;color:var(--text);margin-bottom:18px;line-height:1.6">${esc(i.derived_interpretation)}</div>
+    <div style="font-weight:700;font-size:13.5px;margin-bottom:8px">Observed Graph Facts</div>
+    ${(i.observed_facts || []).map(f => `
+      <div style="font-size:13px;color:var(--text-dim);margin-bottom:6px;display:flex;gap:8px">
+        <span style="color:var(--accent)">➔</span> ${esc(f)}
+      </div>
+    `).join('') || '<div class="empty">No specific facts recorded.</div>'}
+    ${(i.alternative_explanations || []).length ? `
+      <div style="font-weight:700;font-size:13.5px;margin:18px 0 8px">Alternative Explanations</div>
+      ${i.alternative_explanations.map(a => `<div style="font-size:13px;color:var(--text-faint);margin-bottom:4px">· ${esc(a)}</div>`).join('')}
+    ` : ''}
+    <div style="margin-top:20px;padding:12px;border-radius:10px;background:var(--bg1);border:1px solid var(--border);font-size:12px;color:var(--text-faint)">
+      ${esc(i.disclaimer || 'Intelligence alert generated automatically from graph topology.')}
+    </div>`);
+}
+
+function triggerCaseAIDossierFromInsights() {
+  const caseSelect = document.getElementById('iCase');
+  const selVal = caseSelect?.value || '';
+  if (selVal && selVal !== '__DELTA__') {
+    const cObj = (state.cases || []).find(c => c.case_id === selVal);
+    openAIInsightsModal(selVal, cObj?.case_name || selVal);
+  } else if (state.cases && state.cases.length) {
+    const cObj = state.cases[0];
+    openAIInsightsModal(cObj.case_id, cObj.case_name || cObj.case_id);
+  } else {
+    toast('Please select a case to generate AI Dossier', 'info');
+  }
+}
+
+async function openAIInsightsModal(caseId, caseName) {
+  openModal(`
+    <div style="min-width:320px;max-width:720px;padding:6px 0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <h3 style="margin:0;display:inline-flex;align-items:center;gap:8px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+              AI Case Intelligence Dossier
+            </h3>
+            <span class="tag open" style="background:rgba(0, 210, 255, 0.15);color:var(--accent);border-color:rgba(0, 210, 255, 0.3);font-size:11px">Google Gemini 2.5</span>
+          </div>
+          <div style="font-size:13px;color:var(--text-dim);margin-top:3px">${esc(caseName || caseId)} (<span class="mono">${esc(caseId)}</span>)</div>
+        </div>
+        <button class="neu-btn ghost" onclick="closeModal()" style="padding:4px 8px">✕</button>
+      </div>
+      <div id="aiModalContent">
+        <div style="padding:40px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div class="status-dot" style="width:16px;height:16px;background:var(--accent);animation:pulse 1s infinite"></div>
+          <div style="font-weight:600;font-size:14px">Synthesizing forensic intelligence with Gemini 2.5 Flash…</div>
+          <div style="font-size:12.5px;color:var(--text-faint)">Correlating suspects, transaction chains, and graph anomalies from Neo4j</div>
+        </div>
+      </div>
+    </div>
+  `);
+
+  try {
+    const ai = await API.get(`/api/cases/${encodeURIComponent(caseId)}/ai-insights`);
+    const box = document.getElementById('aiModalContent');
+    if (!box) return;
+
+    const riskColor = ai.risk_level === 'CRITICAL' ? '#f43f5e' : (ai.risk_level === 'HIGH' ? '#f59e0b' : '#10b981');
+    const suspectsHtml = (ai.key_suspects || []).map(s => `<li style="margin-bottom:6px">${esc(s)}</li>`).join('') || '<li>No individual suspects flagged.</li>';
+    const anomaliesHtml = (ai.critical_anomalies || []).map(a => `<li style="margin-bottom:6px">${esc(a)}</li>`).join('') || '<li>No critical graph anomalies detected.</li>';
+    const leadsHtml = (ai.investigative_leads || []).map(l => `<li style="margin-bottom:8px;font-weight:500">${esc(l)}</li>`).join('') || '<li>Continue routine evidentiary collection.</li>';
+
+    box.innerHTML = `
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;background:var(--bg1);padding:10px 14px;border-radius:10px;border:1px solid var(--border);flex-wrap:wrap">
+        <span class="tag" style="background:${riskColor}22;color:${riskColor};border:1px solid ${riskColor}44;font-weight:700">
+          RISK LEVEL: ${esc(ai.risk_level)}
+        </span>
+        <div style="font-size:12px;color:var(--text-faint);flex:1;text-align:right">
+          Analyzed by <b>${esc(ai.ai_model)}</b> · Live Neo4j Sync
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;font-size:13.5px;margin-bottom:6px;color:var(--text)">Executive Forensic Summary</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);padding:12px;border-radius:8px;border:1px solid var(--border)">
+          ${esc(ai.executive_summary)}
+        </div>
+      </div>
+
+      ${ai.modus_operandi ? `
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700;font-size:13.5px;margin-bottom:6px;color:var(--text)">Modus Operandi & Syndicate Structure</div>
+        <div style="font-size:12.5px;line-height:1.6;color:var(--text-dim);background:var(--surface);padding:12px;border-radius:8px;border:1px solid var(--border)">
+          ${esc(ai.modus_operandi)}
+        </div>
+      </div>` : ''}
+
+      <div class="cards-grid" style="grid-template-columns: 1fr 1fr;gap:14px;margin-bottom:16px">
+        <div style="background:var(--surface);padding:12px;border-radius:8px;border:1px solid var(--border)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:var(--accent)">Key Suspects & Roles</div>
+          <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:var(--text-dim)">
+            ${suspectsHtml}
+          </ul>
+        </div>
+        <div style="background:var(--surface);padding:12px;border-radius:8px;border:1px solid var(--border)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#f59e0b">Critical Graph Red Flags</div>
+          <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:var(--text-dim)">
+            ${anomaliesHtml}
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;color:var(--text);display:flex;align-items:center;gap:6px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Actionable Law Enforcement Next Steps
+        </div>
+        <div style="background:rgba(0, 210, 255, 0.05);border:1px solid rgba(0, 210, 255, 0.2);padding:12px;border-radius:8px">
+          <ol style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:var(--text)">
+            ${leadsHtml}
+          </ol>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    const box = document.getElementById('aiModalContent');
+    if (box) {
+      box.innerHTML = `<div class="empty" style="color:var(--red)">Failed to generate AI insights: ${esc(err.message)}</div>`;
+    }
+  }
+}
+
+// ---------- Module: Chain of Custody (Blockchain) ----------
+function blockchainView() {
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Blockchain Evidence Chain of Custody
+      </div>
+      <div class="row" style="gap:10px">
+        <div class="field" style="min-width:260px">
+          <input class="control" id="bcSearch" placeholder="Search case ID or document..." oninput="renderBlockchainCases()">
+        </div>
+      </div>
+    </div>
+    <div id="bcHeaderSummary"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Investigation Cases & Evidence Verification</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="neu-btn ghost" style="padding:4px 10px;font-size:11.5px" onclick="expandAllBlockchainCases(true)">Expand All</button>
+        <button class="neu-btn ghost" style="padding:4px 10px;font-size:11.5px" onclick="expandAllBlockchainCases(false)">Collapse All</button>
+        <span class="tag plain" id="bcCaseCount">0 Cases</span>
+      </div>
+    </div>
+    <div id="bcCaseList" style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+      <div class="skeleton sk-row"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Immutable Block History Ledger</div>
+      <span class="tag plain" id="bcCount">0 Blocks</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Block #</th>
+            <th>Case ID</th>
+            <th>Document Name / Type</th>
+            <th>Timestamp</th>
+            <th>Evidence Hash (SHA-256)</th>
+            <th>Merkle Root</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="bcTbody"></tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+async function bindBlockchain() {
+  const tb = document.getElementById('bcTbody');
+  const sumBox = document.getElementById('bcHeaderSummary');
+  if (tb) tb.innerHTML = `<tr><td colspan="7"><div class="skeleton sk-row"></div></td></tr>`;
+
+  try {
+    if (!state.cases || !state.cases.length) await loadCases();
+    const data = await API.get('/api/v1/blockchain/ledger');
+    state.blockchainBlocks = data.blocks || [];
+    if (!state.expandedBlockchainCases) state.expandedBlockchainCases = new Set();
+
+    const countEl = document.getElementById('bcCount');
+    if (countEl) countEl.textContent = `${state.blockchainBlocks.length} Blocks`;
+
+    // Compute tamper count
+    const totalTampered = state.blockchainBlocks.filter(b => b.is_valid === false).length;
+
+    if (sumBox) {
+      sumBox.innerHTML = `
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));margin-top:10px">
+          <div class="stat-card" style="--glow:${totalTampered > 0 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.2)'}">
+            <div class="stat-label">Ledger Integrity</div>
+            <div class="stat-value" style="font-size:18px;margin-top:14px;color:${totalTampered > 0 ? '#ef4444' : '#10b981'}">
+              ${totalTampered > 0 ? `🔴 ${totalTampered} TAMPERED BLOCK(S)` : '🟢 100% VERIFIED'}
+            </div>
+          </div>
+          <div class="stat-card" style="--glow:rgba(99, 102, 241, 0.2)">
+            <div class="stat-label">Encryption Standard</div>
+            <div class="stat-value" style="font-size:18px;margin-top:14px">SHA-256 Merkle Proof</div>
+          </div>
+        </div>`;
+    }
+
+    renderBlockchainCases();
+    renderBlockchainHistoryTable();
+  } catch (e) {
+    if (tb) tb.innerHTML = `<tr><td colspan="7"><div class="empty" style="color:var(--red)">${esc(e.message)}</div></td></tr>`;
+  }
+}
+
+function toggleBlockchainCase(caseId) {
+  if (!state.expandedBlockchainCases) state.expandedBlockchainCases = new Set();
+  if (state.expandedBlockchainCases.has(caseId)) {
+    state.expandedBlockchainCases.delete(caseId);
+  } else {
+    state.expandedBlockchainCases.add(caseId);
+  }
+  renderBlockchainCases();
+}
+
+function expandAllBlockchainCases(expand) {
+  if (!state.expandedBlockchainCases) state.expandedBlockchainCases = new Set();
+  if (expand) {
+    const caseIds = [...new Set((state.blockchainBlocks || []).map(b => b.case_id))];
+    caseIds.forEach(id => state.expandedBlockchainCases.add(id));
+  } else {
+    state.expandedBlockchainCases.clear();
+  }
+  renderBlockchainCases();
+}
+
+function renderBlockchainCases() {
+  const box = document.getElementById('bcCaseList');
+  if (!box) return;
+
+  const query = (document.getElementById('bcSearch')?.value || '').toLowerCase().trim();
+  const blocks = state.blockchainBlocks || [];
+
+  // Group blocks by case_id (excluding SYSTEM_GENESIS)
+  const caseMap = {};
+  blocks.forEach(b => {
+    const cid = b.case_id || 'UNKNOWN';
+    if (cid === 'SYSTEM_GENESIS' || b.document_type === 'SYSTEM_GENESIS') return;
+    if (!caseMap[cid]) caseMap[cid] = [];
+    caseMap[cid].push(b);
+  });
+
+  const registryCaseIds = (state.cases || []).map(c => c.case_id).filter(id => id && id !== 'SYSTEM_GENESIS');
+  const ledgerCaseIds = Object.keys(caseMap).filter(id => id !== 'SYSTEM_GENESIS');
+  const caseIds = [...new Set([...registryCaseIds, ...ledgerCaseIds])].sort();
+
+  const countEl = document.getElementById('bcCaseCount');
+  if (countEl) countEl.textContent = `${caseIds.length} Cases`;
+
+  if (!caseIds.length) {
+    box.innerHTML = `<div class="empty">No blockchain cases recorded. Ingest case data to populate evidence blocks.</div>`;
+    return;
+  }
+
+  const docIconMap = {
+    FIR: '📜',
+    CDR_LOG: '📞',
+    BANK_STATEMENT: '💳',
+    SURVEILLANCE_LOG: '📹',
+    INTEL_REPORT: '📄',
+    CASE_MASTER: '📂'
+  };
+
+  let renderedCount = 0;
+  box.innerHTML = caseIds.map(cid => {
+    const caseBlocks = caseMap[cid] || [];
+    const cObj = (state.cases || []).find(c => c.case_id === cid);
+    const caseName = cObj?.case_name || cid;
+
+    // Filter check
+    if (query && !cid.toLowerCase().includes(query) && !caseName.toLowerCase().includes(query)) {
+      const matchDoc = caseBlocks.some(b => 
+        (b.document_name || '').toLowerCase().includes(query) || 
+        (b.document_type || '').toLowerCase().includes(query) ||
+        (b.evidence_hash || '').toLowerCase().includes(query)
+      );
+      if (!matchDoc) return '';
+    }
+
+    renderedCount++;
+    const isTampered = caseBlocks.some(b => b.is_valid === false);
+    const isExpanded = state.expandedBlockchainCases?.has(cid);
+
+    const caseBadge = isTampered
+      ? `<span class="tag crit" style="background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.4);font-weight:700">🔴 TAMPERED</span>`
+      : `<span class="tag low" style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);font-weight:700">🟢 VERIFIED</span>`;
+
+    const docCardsHtml = isExpanded ? `
+      <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)">
+        ${caseBlocks.length ? caseBlocks.map(b => {
+          const isValid = b.is_valid !== false;
+          const icon = docIconMap[b.document_type] || '📁';
+          const docBadge = isValid
+            ? `<span class="tag low">VERIFIED</span>`
+            : `<span class="tag crit" style="background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.4);font-weight:700">TAMPERED</span>`;
+          return `
+            <div class="card" style="margin-bottom:0;background:var(--surface-hover);border:1px solid ${isValid ? 'var(--border)' : 'rgba(239,68,68,0.4)'}">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                <span style="font-size:22px">${icon}</span>
+                ${docBadge}
+              </div>
+              <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:4px">${esc(b.document_name || b.document_type)}</div>
+              <div class="mono" style="font-size:11px;color:var(--text-faint);margin-bottom:10px">ID: ${esc(b.document_id)} · Block #${b.index}</div>
+              <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px">Evidence Payload Hash:</div>
+              <div class="mono" style="font-size:10.5px;color:${isValid ? 'var(--accent)' : '#ef4444'};word-break:break-all;background:var(--bg1);padding:6px;border-radius:6px;border:1px solid var(--border)">
+                ${esc(b.evidence_hash)}
+              </div>
+              <div style="font-size:11px;color:var(--text-faint);margin-top:8px;text-align:right">${esc(b.formatted_time)}</div>
+            </div>`;
+        }).join('') : '<div class="empty" style="grid-column:1/-1">No document evidence blocks logged yet for this case.</div>'}
+      </div>` : '';
+
+    return `
+      <div class="card" style="margin-bottom:0;border:1px solid ${isTampered ? 'rgba(239,68,68,0.4)' : 'var(--border)'}">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="toggleBlockchainCase('${esc(cid)}')">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:20px;color:var(--accent)">📁</span>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:var(--text)">${esc(caseName)}</div>
+              <div class="mono" style="font-size:12px;color:var(--text-faint)">Case ID: ${esc(cid)} · ${caseBlocks.length} Document Blocks</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px">
+            ${caseBadge}
+            <span style="font-size:13px;color:var(--accent);font-weight:600">${isExpanded ? '▲ Hide Documents' : '▼ View Documents'}</span>
+          </div>
+        </div>
+        ${docCardsHtml}
+      </div>`;
+  }).join('');
+
+  if (renderedCount === 0 && query) {
+    box.innerHTML = `<div class="empty">No cases or documents match filter query "${esc(query)}".</div>`;
+  }
+}
+
+function renderBlockchainHistoryTable() {
+  const tb = document.getElementById('bcTbody');
+  if (!tb) return;
+  const blocks = (state.blockchainBlocks || []).filter(b => b.case_id !== 'SYSTEM_GENESIS' && b.document_type !== 'SYSTEM_GENESIS');
+
+  if (!blocks.length) {
+    tb.innerHTML = `<tr><td colspan="7"><div class="empty">No blockchain blocks recorded.</div></td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = blocks.map(b => {
+    const isValid = b.is_valid !== false;
+    const badge = isValid
+      ? `<span class="tag low">VERIFIED</span>`
+      : `<span class="tag crit" style="background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.4);font-weight:700">TAMPERED</span>`;
+    return `
+      <tr style="${!isValid ? 'background:rgba(239,68,68,0.06)' : ''}">
+        <td class="mono"><b>#${b.index}</b></td>
+        <td><span class="tag open mono" onclick="toggleBlockchainCase('${esc(b.case_id)}');renderBlockchainCases();" style="cursor:pointer">${esc(b.case_id)}</span></td>
+        <td><b>${esc(b.document_name || b.document_type || 'CASE_MASTER')}</b> <span class="mono" style="font-size:11px;color:var(--text-faint)">(${esc(b.document_type)})</span></td>
+        <td style="font-size:12px;color:var(--text-dim)">${esc(b.formatted_time)}</td>
+        <td class="mono" style="font-size:11px" title="${esc(b.evidence_hash)}">${esc(b.evidence_hash.substring(0, 16))}…</td>
+        <td class="mono" style="font-size:11px" title="${esc(b.merkle_root)}">${esc(b.merkle_root.substring(0, 16))}…</td>
+        <td>${badge}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function verifyFullBlockchain() {
+  try {
+    const res = await API.get('/api/v1/blockchain/verify-chain');
+    if (res.valid) {
+      toast(`Blockchain Ledger Audit Complete: All ${res.total_blocks} blocks are 100% untampered and cryptographically valid!`, 'ok');
+    } else {
+      toast(`ALERT: Blockchain ledger integrity violation detected! ${res.violations.join('; ')}`, 'err');
+    }
+  } catch (e) {
+    toast(`Verification failed: ${e.message}`, 'err');
+  }
+}
+
+// ---------- Module: Case Registry & Deletion ----------
+function casesView() {
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Case Registry</div>
+      <div class="row" style="gap:10px">
+        <div class="field" style="max-width:180px">
+          <select class="control" id="cStatus" onchange="renderCaseTable()">
+            <option value="">All Statuses</option>
+            <option>OPEN</option>
+            <option>UNDER_INVESTIGATION</option>
+            <option>CHARGED</option>
+            <option>CLOSED</option>
+          </select>
+        </div>
+        <button class="neu-btn ghost" onclick="loadCases()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Case Identifier</th>
+            <th>Type</th>
+            <th>Jurisdiction</th>
+            <th>Lead Investigator</th>
+            <th>Entities</th>
+            <th>Status</th>
+            <th>AI Insights (Gemini)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="caseTbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="caseDetail"></div>`;
+}
+
+function bindCases() {
+  renderCaseTable();
+}
+
+function renderCaseTable() {
+  const st = document.getElementById('cStatus')?.value || '';
+  const list = st ? (state.cases || []).filter(c => (c.status || '').toUpperCase() === st.toUpperCase()) : (state.cases || []);
+  const tb = document.getElementById('caseTbody');
+  if (!tb) return;
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="8"><div class="empty">No cases registered matching criteria.</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map(x => `
+    <tr style="cursor:pointer" onclick="openCase('${esc(x.case_id)}')">
+      <td>
+        <div style="font-weight:700;color:var(--text)">${esc(x.case_name || x.case_id)}</div>
+        <div class="mono" style="color:var(--text-faint)">${esc(x.case_id)}</div>
+      </td>
+      <td>${esc(x.case_type || '—')}</td>
+      <td>${esc(x.jurisdiction || '—')}</td>
+      <td>${esc(x.lead_investigator || '—')}</td>
+      <td class="mono"><b>${x.total_entities}</b></td>
+      <td><span class="tag ${(x.status || 'open').toLowerCase().includes('close') ? 'closed' : 'open'}">${esc(x.status || 'OPEN')}</span></td>
+      <td onclick="event.stopPropagation()">
+        <button class="neu-btn ghost" style="padding:4px 9px;font-size:11.5px;color:var(--accent);display:inline-flex;align-items:center;gap:6px" onclick="openAIInsightsModal('${esc(x.case_id)}', '${esc(x.case_name || x.case_id)}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+          ✨ Gemini AI
+        </button>
+      </td>
+      <td style="text-align:right" onclick="event.stopPropagation()">
+        <button class="neu-btn danger" style="padding:5px 10px;font-size:12px" onclick="promptDeleteCase('${esc(x.case_id)}', '${esc(x.case_name || x.case_id)}')">
+          Delete
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function loadCases() {
+  try {
+    state.cases = await API.get('/api/cases?limit=200');
+    renderCaseTable();
+  } catch (e) {
+    toast(`Failed to load cases: ${e.message}`, 'err');
+  }
+  return state.cases;
+}
+
+async function openCase(id) {
+  state.selectedCase = id;
+  const box = document.getElementById('caseDetail');
+  if (!box) return;
+  box.innerHTML = `<div class="skeleton sk-row"></div>`;
+
+  try {
+    const c = await API.get(`/api/cases/${encodeURIComponent(id)}`);
+    box.innerHTML = caseDetailHtml(c);
+    loadCaseGraph(id);
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:var(--red)">${esc(e.message)}</div>`;
+  }
+}
+
+function caseDetailHtml(c) {
+  const m = c.metadata || {};
+  const entityRows = Object.entries(c.entity_breakdown || {}).map(([k, v]) => `
+    <div class="list-row">
+      <div class="l-name">${esc(k)}</div>
+      <span class="tag plain mono">${v}</span>
+    </div>
+  `).join('') || '<div class="empty">No entity breakdown recorded.</div>';
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="card-title">${esc(m.case_name || c.case_id)}</div>
+          <span class="tag ${(m.status || 'open').toLowerCase().includes('close') ? 'closed' : 'open'}">${esc(m.status || 'OPEN')}</span>
+        </div>
+        <div class="mono" style="color:var(--text-faint);font-size:12px;margin-top:2px">${esc(c.case_id)}</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="neu-btn primary" onclick="openAIInsightsModal('${esc(c.case_id)}', '${esc(m.case_name || c.case_id)}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+          ✨ Gemini AI Dossier
+        </button>
+        <button class="neu-btn ghost" onclick="go('graph')">Explore in Graph</button>
+        <button class="neu-btn danger" onclick="promptDeleteCase('${esc(c.case_id)}', '${esc(m.case_name || c.case_id)}')">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete Case
+        </button>
+      </div>
+    </div>
+    ${m.summary ? `<div style="font-size:14px;color:var(--text-dim);margin-bottom:18px;line-height:1.6">${esc(m.summary)}</div>` : ''}
+    <div class="kv" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+      ${m.case_type ? `<div><div class="k">Investigation Type</div><div class="v">${esc(m.case_type)}</div></div>` : ''}
+      ${m.jurisdiction ? `<div><div class="k">Jurisdiction</div><div class="v">${esc(m.jurisdiction)}</div></div>` : ''}
+      ${m.lead_investigator ? `<div><div class="k">Lead Investigator</div><div class="v">${esc(m.lead_investigator)}</div></div>` : ''}
+      ${m.created_date ? `<div><div class="k">Date Filed</div><div class="v">${esc(m.created_date)}</div></div>` : ''}
+      <div><div class="k">Total Entities</div><div class="v mono">${c.total_entities}</div></div>
+    </div>
+    <div style="font-weight:700;font-size:14px;margin:22px 0 10px">Entity Breakdown</div>
+    ${entityRows}
+    <div style="margin-top:20px"><div id="caseGraphViz"></div></div>
+  </div>`;
+}
+
+async function loadCaseGraph(id) {
+  const host = document.getElementById('caseGraphViz');
+  if (!host) return;
+  host.innerHTML = '<div class="empty">Loading case network…</div>';
+
+  try {
+    const g = await API.get(`/api/graph?case_id=${encodeURIComponent(id)}&limit=400`);
+    host.innerHTML = `<div id="caseGraphMini" style="height:360px;border-radius:12px;border:1px solid var(--border);background:var(--graph-bg);overflow:hidden"></div>`;
+    const container = document.getElementById('caseGraphMini');
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+    const seenNodeIds = new Set();
+    const nodes = [];
+    (g.nodes || []).forEach(n => {
+      if (n && n.id && !seenNodeIds.has(n.id)) {
+        seenNodeIds.add(n.id);
+        nodes.push({
+          id: n.id,
+          label: n.name || n.id,
+          size: 12,
+          shape: 'dot',
+          color: { background: LABEL_COLOR[n.labels?.[0]] || '#94a3b8', border: isLight ? '#ffffff' : '#070a12' },
+          font: { color: isLight ? '#0f172a' : '#cbd5e1', size: 11 }
+        });
+      }
+    });
+
+    const seenEdgeIds = new Set();
+    const edges = [];
+    (g.edges || []).forEach((e, idx) => {
+      if (!e || !e.source || !e.target) return;
+      let edgeId = String(e.id || `edge_${e.source}_${e.type}_${e.target}_${idx}`);
+      if (seenEdgeIds.has(edgeId)) edgeId = `${edgeId}_${idx}`;
+      seenEdgeIds.add(edgeId);
+      edges.push({
+        id: edgeId,
+        from: e.source,
+        to: e.target,
+        arrows: 'to',
+        color: { color: isLight ? 'rgba(51, 65, 85, 0.4)' : 'rgba(148, 163, 184, 0.4)' }
+      });
+    });
+
+    const seed = getDeterministicSeed(id);
+    const data = { nodes, edges };
+    new vis.Network(container, data, {
+      layout: { randomSeed: seed, improvedLayout: true },
+      physics: {
+        solver: 'forceAtlas2Based',
+        forceAtlas2Based: {
+          gravitationalConstant: -55,
+          centralGravity: 0.015,
+          springLength: 150,
+          springConstant: 0.07,
+          damping: 0.52,
+          avoidOverlap: 0.85
+        },
+        stabilization: { iterations: 140 }
+      },
+      nodes: { borderWidth: 2 },
+      edges: { width: 1.2 }
+    });
+  } catch (e) {
+    host.innerHTML = `<div class="empty" style="color:var(--red)">${esc(e.message)}</div>`;
+  }
+}
+
+// ---------- Confirmation & Case Deletion ----------
+function promptDeleteCase(caseId, caseName) {
+  openModal(`
+    <div class="confirm-box">
+      <div class="confirm-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div class="confirm-title">Confirm Case Deletion</div>
+      </div>
+      <div class="confirm-body">
+        Are you sure you want to permanently delete case <b style="color:var(--text)">${esc(caseName || caseId)}</b> (<span class="mono">${esc(caseId)}</span>)?
+        <br><br>
+        <b style="color:var(--amber)">Integrity Preservation:</b>
+        <ul style="margin:8px 0 0 18px;font-size:13px;line-height:1.6">
+          <li>Entities exclusively owned by this case will be permanently removed.</li>
+          <li>Entities shared with other cases will be <b>preserved</b> (only unlinked from this case).</li>
+          <li>All case-specific communication and transaction relationships will be purged.</li>
+        </ul>
+      </div>
+      <div class="confirm-actions">
+        <button class="neu-btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="neu-btn danger" id="btnConfirmDelete" onclick="executeDeleteCase('${esc(caseId)}')">
+          Confirm & Delete Case
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+async function executeDeleteCase(caseId) {
+  const btn = document.getElementById('btnConfirmDelete');
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+
+  try {
+    const res = await API.delete(`/api/cases/${encodeURIComponent(caseId)}?confirm=true`);
+    closeModal();
+    toast(`Case ${caseId} deleted: ${res.nodes_removed} nodes removed, ${res.nodes_detached} shared nodes preserved.`, 'ok');
+
+    // Update state reactively
+    state.cases = state.cases.filter(c => c.case_id !== caseId);
+    if (state.selectedCase === caseId) {
+      state.selectedCase = null;
+      const cd = document.getElementById('caseDetail');
+      if (cd) cd.innerHTML = '';
+    }
+
+    renderCaseTable();
+    checkHealth();
+  } catch (e) {
+    toast(`Failed to delete case: ${e.message}`, 'err');
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm & Delete Case'; }
+  }
+}
+
+function promptResetDatabase() {
+  openModal(`
+    <div class="confirm-box">
+      <div class="confirm-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div class="confirm-title" style="color:var(--danger)">Reset Entire Graph Database?</div>
+      </div>
+      <div class="confirm-body">
+        This operation executes a complete database wipe (<span class="mono">MATCH (n) DETACH DELETE n</span>).
+        <br><br>
+        <b style="color:var(--red)">All cases, persons, phones, accounts, vehicles, and forensic logs will be permanently deleted.</b>
+        This action cannot be undone.
+      </div>
+      <div class="confirm-actions">
+        <button class="neu-btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="neu-btn danger" id="btnConfirmReset" onclick="executeResetDatabase()">
+          Yes, Wipe Everything
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+async function executeResetDatabase() {
+  const btn = document.getElementById('btnConfirmReset');
+  if (btn) { btn.disabled = true; btn.textContent = 'Wiping database…'; }
+
+  try {
+    const res = await API.delete('/api/cases/reset?confirm=true');
+    closeModal();
+    toast(res.message || 'Graph database cleared.', 'ok');
+    state.cases = [];
+    state.selectedCase = null;
+    state.insights = [];
+    state.graphNodes = [];
+    state.graphEdges = [];
+    if (state.network) {
+      state.network.destroy();
+      state.network = null;
+    }
+    renderView();
+    checkHealth();
+  } catch (e) {
+    toast(`Database reset failed: ${e.message}`, 'err');
+    if (btn) { btn.disabled = false; btn.textContent = 'Yes, Wipe Everything'; }
+  }
+}
+
+// ---------- Module: Data Ingestion ----------
+function ingestView() {
+  return `
+  <div class="card">
+    <div class="card-header"><div class="card-title">Upload Investigation Data Files</div></div>
+    <div style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:34px;border:2px dashed var(--border);border-radius:var(--radius);background:var(--bg1);transition:.2s" id="dropZone"
+      ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="dropFiles(event)">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14m-7-7h14"/><path d="M3 7a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>
+      <div style="color:var(--text-dim);font-size:14px;text-align:center">
+        Drag & drop structured case JSON, CDR / Telecom CSV, Bank statements, or FIR narratives
+      </div>
+      <input type="file" id="ingestFiles" multiple hidden onchange="handleFiles(this.files)">
+      <button class="neu-btn primary" onclick="document.getElementById('ingestFiles').click()">Select Files</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Direct Narrative / FIR Text Ingestion</div></div>
+    <textarea class="control" id="ingestText" rows="6" placeholder="Paste unformatted case narrative, FIR description, or CDR tabular text directly here…" style="width:100%;resize:vertical"></textarea>
+    <div class="row" style="margin-top:14px">
+      <button class="neu-btn primary" onclick="ingestRawText()">Ingest Narrative Text</button>
+    </div>
+  </div>
+  <div class="card" style="display:none" id="ingestResult">
+    <div class="card-header"><div class="card-title">Ingestion Summary</div></div>
+    <div id="ingestResultBody"></div>
+  </div>`;
+}
+
+function bindIngest() {}
+
+function dropFiles(ev) {
+  ev.preventDefault();
+  document.getElementById('dropZone').style.borderColor = 'var(--border)';
+  handleFiles(ev.dataTransfer.files);
+}
+
+async function handleFiles(files) {
+  if (!files || !files.length) return;
+  const fd = new FormData();
+  Array.from(files).forEach(f => fd.append('files', f));
+
+  const result = document.getElementById('ingestResult');
+  result.style.display = 'block';
+  const body = document.getElementById('ingestResultBody');
+  body.innerHTML = `<div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>`;
+  toast(`Uploading ${files.length} file(s)…`, 'info');
+
+  try {
+    const res = await API.send('/api/v1/ingest', { method: 'POST', body: fd, form: true });
+    body.innerHTML = renderIngestResult(res);
+    toast('Data ingested successfully', 'ok');
+    loadCases();
+  } catch (e) {
+    body.innerHTML = `<div class="empty" style="color:var(--red)">${esc(e.message)}</div>`;
+    toast(`Ingestion failed: ${e.message}`, 'err');
+  }
+}
+
+async function ingestRawText() {
+  const txt = document.getElementById('ingestText').value.trim();
+  if (!txt) { toast('Please provide narrative text to ingest', 'info'); return; }
+
+  const body = document.getElementById('ingestResultBody');
+  document.getElementById('ingestResult').style.display = 'block';
+  body.innerHTML = `<div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>`;
+
+  try {
+    const res = await API.send('/api/v1/ingest/text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: txt,
+      form: false
+    });
+    body.innerHTML = renderIngestResult(res);
+    toast('Text ingested successfully', 'ok');
+    loadCases();
+  } catch (e) {
+    body.innerHTML = `<div class="empty" style="color:var(--red)">${esc(e.message)}</div>`;
+    toast(`Ingestion failed: ${e.message}`, 'err');
+  }
+}
+
+function renderIngestResult(res) {
+  const c = res.created || {};
+  return `
+  <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+    ${statCard('Nodes Created', c.nodes || 0, '', 'rgba(0, 210, 255, 0.2)')}
+    ${statCard('Relationships', c.relationships || 0, '', 'rgba(99, 102, 241, 0.2)')}
+    ${statCard('Source Records', c.source_records || 0, '', 'rgba(16, 185, 129, 0.2)')}
+    ${statCard('New Insights', res.new_insights || 0, '', 'rgba(245, 158, 11, 0.2)')}
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px">
+    <span class="tag open">Case ${esc(res.case_id)}</span>
+    <span class="tag plain">Matched Existing: ${res.matched_existing_entities || 0}</span>
+    <span class="tag plain">Cross-Case Links: ${res.new_cross_case_links || 0}</span>
+  </div>
+  ${(res.warnings || []).length ? `
+    <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);padding:12px 16px;border-radius:12px;font-size:13px;color:var(--amber);margin-bottom:14px">
+      ${res.warnings.map(w => '⚠ ' + esc(w)).join('<br>')}
+    </div>
+  ` : ''}
+  <div style="display:flex;gap:10px">
+    <button class="neu-btn primary" onclick="go('insights')">Review Generated Insights</button>
+    <button class="neu-btn ghost" onclick="go('cases')">View in Case Registry</button>
+  </div>`;
+}
+
+// ---------- Modal Helpers ----------
+function openModal(html) {
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ---------- Chart Helper ----------
+function drawChart(id, type, labels, data, colors = ['#00d2ff', '#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#a855f7']) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (state.charts[id]) state.charts[id].destroy();
+
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const textColor = isLight ? '#475569' : '#94a3b8';
+  const gridColor = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.05)';
+
+  const ctx = el.getContext('2d');
+  const axisOpts = () => ({ ticks: { color: textColor }, grid: { color: gridColor } });
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: type === 'doughnut', position: 'right', labels: { color: textColor } }
+    },
+    scales: type === 'bar' ? { x: axisOpts(), y: axisOpts() } : {}
+  };
+
+  state.charts[id] = new Chart(ctx, {
+    type: type,
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: colors,
+        borderColor: colors,
+        borderWidth: 1,
+        borderRadius: 6,
+        barPercentage: 0.6
+      }]
+    },
+    options: options
+  });
+}
+
+// ---------- Initialization ----------
+function init() {
+  applyTheme(getInitialTheme());
+  buildNav();
+  go('overview');
+  checkHealth();
+  setInterval(checkHealth, 30000);
+  navigateToHash();
+}
+
+function navigateToHash() {
+  const h = location.hash.replace('#', '');
+  if (NAV.find(n => n.id === h)) go(h);
+}
+
+window.addEventListener('hashchange', navigateToHash);
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

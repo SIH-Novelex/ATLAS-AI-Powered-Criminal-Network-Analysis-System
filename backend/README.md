@@ -1,0 +1,98 @@
+﻿# ⚙️ Backend Core (Graph Intelligence & REST API Engine)
+
+The `backend/` directory houses the core intelligence engine for the **AI-Powered Criminal Network Analysis System**, implemented in Python 3.11+ using **FastAPI** and **Neo4j**. It orchestrates forensic graph persistence, real-time event ingestion, 10 suspicious pattern detectors, ambiguity-safe shortest path calculations, graph centrality rankings, cryptographic chain-of-custody ledgers, and the **Gemini 2.5 Flash AI Copilot**.
+
+---
+
+## 📂 Architecture Overview
+
+```
+backend/
+├── config.py              # Environment configuration & Pydantic settings
+├── database.py            # Neo4j bolt driver lifecycle & session pool
+├── logging_config.py      # Structured JSON logging with automatic PII masking
+├── main.py                # FastAPI app initialization, middleware & static routing
+│
+├── models/                # 📐 Pydantic v2 Schemas & Data Contracts
+│   ├── case_input.py      # Case envelope, batch payloads, delete contracts
+│   ├── common.py          # Audit timestamps, error structures
+│   ├── entity.py          # Entity models (Person, Vehicle, Account, Location, etc.)
+│   ├── event.py           # Real-time event streaming delta schemas
+│   ├── insights.py        # Suspicious pattern items & AI Copilot request/response
+│   ├── path.py            # Shortest path & ambiguity candidate schemas
+│   ├── rankings.py        # Graph centrality & PageRank models
+│   └── relationship.py    # Directional relationship schemas
+│
+├── routers/               # 🌐 REST API Endpoints
+│   ├── blockchain.py      # Chain-of-custody blocks & cryptographic verification
+│   ├── cases.py           # Multi-file case ingestion & deletion
+│   ├── events.py          # Real-time event streaming (`POST /api/events`)
+│   ├── graph.py           # Topology data, search & Gemini Copilot endpoint
+│   ├── health.py          # Liveness probes & database reset utilities
+│   ├── ingest.py          # Unified case data ingestion
+│   ├── insights.py        # 10 automated pattern detection queries
+│   ├── path.py            # Ambiguity-safe pathfinding
+│   └── rankings.py        # PageRank, betweenness, and degree centrality
+│
+└── services/              # 🧠 Domain Intelligence & Business Logic
+    ├── blockchain_service.py  # SHA-256 Merkle root computation & tamper detection
+    ├── delta_processor.py     # Real-time event application with idempotency
+    ├── gemini_service.py      # Gemini 2.5 Flash LLM with offline heuristic fallback
+    ├── graph_service.py       # Graph retrieval, neighbor expansion & filtering
+    ├── graph_writes.py        # Batched atomic Cypher writes with business keys
+    ├── ingestion_engine.py    # Forensic case entity & relation extraction
+    ├── ingestion_service.py   # Transactional case persistence coordinator
+    ├── insights_engine.py     # Pattern detection orchestrator
+    ├── path_service.py        # Breadth-first shortest path with fuzzy resolution
+    ├── ranking_service.py     # Graph centrality algorithms
+    ├── schema_manager.py      # Neo4j uniqueness constraints & schema indexing
+    ├── schema_mapper.py       # Payload normalization mapper
+    └── scoped_detectors.py    # Case-scoped Cypher queries for all 10 detectors
+```
+
+---
+
+## 🛡️ Key Modules & Capabilities
+
+### 1. Gemini AI Copilot Service (`services/gemini_service.py`)
+- **Model**: Google Gemini 2.5 Flash via the official `google-genai` SDK.
+- **Context Injection**: Dynamically compiles graph statistics (node counts, edge types, top suspects, flagged patterns, recent cases) into the LLM system prompt.
+- **Zero-Downtime Heuristic Fallback**: If the API key is not configured, expired, or rate-limited (`429 Quota Exceeded`), the service automatically switches to a deterministic graph topology analysis algorithm. Requests always succeed with HTTP 200.
+
+### 2. The 10 Automated Suspicious Pattern Detectors (`services/scoped_detectors.py`)
+1. **Frequent Caller Patterns**: Identifies anomalous communication frequency spikes.
+2. **Burner SIM / Multi-SIM Swapping**: Tracks multiple phone numbers registered to identical IMEI hardware.
+3. **Hawala / Financial Laundering Rings**: Traces rapid-movement high-volume funds between accounts.
+4. **Mule Account Syndicates**: Pinpoints dormant accounts suddenly receiving sudden large-sum deposits.
+5. **Cross-Case Suspect Overlap**: Detects individuals appearing across unrelated multi-jurisdiction FIRs.
+6. **Vehicle Convoy Movement**: Detects vehicles sharing identical spatial-temporal routes.
+7. **Co-Location at Crime Scenes**: Correlates suspects present at identical cell tower sectors during incident windows.
+8. **Meeting & Association Clusters**: Identifies dense cliques of co-accused individuals.
+9. **Shell Company / Shared Address Rings**: Uncovers entities sharing registered physical addresses or director nodes.
+10. **High-Risk Centrality Hubs**: Combines PageRank and betweenness centrality to isolate syndicate commanders.
+
+### 3. Blockchain Evidence Ledger (`services/blockchain_service.py`)
+- Computes SHA-256 Merkle trees across all ingested forensic entities and relations.
+- Appends tamper-evident blocks linking each case to the previous block hash (`previous_hash`).
+- Exposes `GET /api/blockchain/verify` to validate the cryptographic integrity of the entire chain of custody.
+
+### 4. Real-Time Event Streaming Engine (`services/delta_processor.py`)
+- Ingests streaming operational events (arrests, seizures, CDR call records, CCTV sightings) via `POST /api/events`.
+- Guarantees idempotent MERGE operations with deterministic business keys without rewriting the graph.
+
+---
+
+## 🏃 Running the Backend Locally
+
+```powershell
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run backend server
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Interactive API documentation will be available at:
+- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Analyst Dashboard**: [http://localhost:8000/](http://localhost:8000/)

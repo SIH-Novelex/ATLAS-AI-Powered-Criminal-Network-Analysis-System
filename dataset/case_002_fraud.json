@@ -1,0 +1,129 @@
+{
+  "case_metadata": {
+    "case_id": "CASE-2024-002",
+    "case_name": "Syndicate Financial Fraud & Hawala Probe",
+    "case_type": "FINANCIAL_FRAUD",
+    "status": "OPEN",
+    "jurisdiction": "Economic Offenses Wing",
+    "lead_investigator": "DSP Shweta Roy",
+    "created_date": "2024-11-01",
+    "summary": "Investigation into money laundering and shell entity banking networks.",
+    "tags": ["Fraud", "Money_Laundering", "Hawala"]
+  },
+  "fir_records": [
+    {
+      "fir_id": "FIR-2024-2044",
+      "fir_number": "2044/2024",
+      "police_station": "EOW Cyber Station",
+      "date": "2024-11-01",
+      "sections": ["IPC 420", "IPC 406", "PMLA Sec 3"],
+      "complainant": "Banking Fraud Prevention Cell",
+      "summary": "Shell company fund siphonage detected across offshore entities.",
+      "accused_person_ids": ["P-001", "P-005"]
+    }
+  ],
+  "entities": {
+    "people": [
+      {
+        "person_id": "P-001",
+        "name": "Devendra Sharma",
+        "aliases": ["Deva"],
+        "dob": "1982-06-14",
+        "national_id": "ID-DEV-8891",
+        "roles": ["Suspect", "Director"],
+        "risk_level": "CRITICAL",
+        "notes": "Director in multiple dormant trading entities."
+      },
+      {
+        "person_id": "P-005",
+        "name": "Suresh Oberoi",
+        "aliases": ["Hawala Kingpin"],
+        "dob": "1978-02-18",
+        "national_id": "ID-SUR-5510",
+        "roles": ["Suspect", "Financier"],
+        "risk_level": "CRITICAL",
+        "notes": "Operates unregistered remittance channel."
+      }
+    ],
+    "phones": [
+      {
+        "phone_number": "+919876543210",
+        "phone_id": "PH-001",
+        "imei": "IMEI-864201041122334",
+        "carrier": "Airtel",
+        "registered_owner": "Devendra Sharma",
+        "owner_person_id": "P-001"
+      },
+      {
+        "phone_number": "+919876543999",
+        "phone_id": "PH-005",
+        "imei": "IMEI-771122334455667",
+        "carrier": "Jio",
+        "registered_owner": "Suresh Oberoi",
+        "owner_person_id": "P-005"
+      }
+    ],
+    "bank_accounts": [
+      {
+        "account_number": "ACC-9001-DEV",
+        "account_id": "B-001",
+        "bank_name": "HDFC Bank",
+        "account_type": "CURRENT",
+        "branch": "MG Road Branch",
+        "holder_name": "Devendra Sharma",
+        "owner_person_id": "P-001"
+      },
+      {
+        "account_number": "ACC-9005-HAWALA",
+        "account_id": "B-005",
+        "bank_name": "Axis Bank",
+        "account_type": "CURRENT",
+        "branch": "Fort Mumbai Branch",
+        "holder_name": "Suresh Oberoi",
+        "owner_person_id": "P-005"
+      }
+    ],
+    "vehicles": [],
+    "social_handles": [],
+    "ip_addresses": [
+      {
+        "ip_address": "198.51.100.45",
+        "ip_type": "IPV4",
+        "asn": "AS45102",
+        "isp": "ACT Fibernet"
+      }
+    ],
+    "cell_towers": [],
+    "locations": []
+  },
+  "relationships": {
+    "communications": [
+      {
+        "call_id": "CALL-2024-099",
+        "source_phone": "+919876543210",
+        "target_phone": "+919876543999",
+        "type": "VOICE_CALL",
+        "timestamp": "2024-10-20T10:00:00Z",
+        "duration_seconds": 320,
+        "source_record_id": "CDR-EOW-2024"
+      }
+    ],
+    "transactions": [
+      {
+        "transaction_id": "TX-2024-9901",
+        "source_account": "ACC-9001-DEV",
+        "target_account": "ACC-9005-HAWALA",
+        "amount": 2500000.0,
+        "currency": "INR",
+        "timestamp": "2024-10-21T15:00:00Z",
+        "transaction_type": "RTGS",
+        "reference_no": "RTGS99118822",
+        "source_record_id": "STMT-HDFC-EOW"
+      }
+    ]
+  },
+  "surveillance_logs": [],
+  "criminal_history": [],
+  "intelligence_reports": []
+}
+

@@ -1,0 +1,421 @@
+{
+  "_doc": [
+    "Deterministic, hand-inspectable fixture for the bulk-vs-incremental equivalence harness (Phase 2 stage 4).",
+    "It is a sequence of CaseData payloads ingested IN ORDER (bulk path) or replayed as one EventBatch per payload",
+    "(incremental path, after the Case node has been created with the shared CASE_MERGE statement).",
+    "Each payload is annotated with the scenario letters (A-N from the Stage 4 brief) it exercises and the insights",
+    "the FULL InsightsEngine is expected to produce once ALL payloads are in (see 'expected_full_insights').",
+    "",
+    "Threshold reminders: HIGH_FAN_IN/OUT need >= 3 distinct counterparties; BRIDGE_NODE needs >= 2 cases AND >= 2 assets;",
+    "SHARED_ENTITY needs size(case_ids) > 1; CROSS_CASE_LINK needs a case on the SOURCE phone that the TARGET lacks.",
+    "Relationship writers never append case_ids to pre-existing endpoints (pre-existing semantics, preserved).",
+    "EQ-E (added at Stage 4 checkpoint): the strict 'relationship between two pre-existing entities' case; expected totals below include it (CROSS_CASE_LINK 3, CROSS_DOMAIN_PATH 5, total 31)."
+  ],
+  "payloads": [
+    {
+      "_scenarios": [
+        "baseline graph for case EQ-A"
+      ],
+      "_expect": [
+        "PRIOR_CASE_LINK (P-A1, PRIOR-A1)               -> scenarios M (via Person) / N (via PriorCase) once replayed",
+        "TRANSFER_CHAIN  ACC-A1 -> ACC-A2 -> ACC-A3      -> scenarios F/G/H: the chain is discoverable from b1, b2 or b3",
+        "POSSIBLE_CO_LOCATION pairs at LOC-A1 among P-A1, P-A2, VIN-A1 -> scenario K (e1 or e2 anchoring)"
+      ],
+      "case_metadata": {
+        "case_id": "EQ-A",
+        "case_name": "Equivalence A",
+        "case_type": "TEST"
+      },
+      "entities": {
+        "people": [
+          {
+            "person_id": "P-A1",
+            "name": "Alpha One",
+            "aliases": [
+              "A1"
+            ],
+            "roles": [
+              "Suspect"
+            ]
+          },
+          {
+            "person_id": "P-A2",
+            "name": "Alpha Two",
+            "roles": [
+              "Associate"
+            ]
+          },
+          {
+            "person_id": "P-A3",
+            "name": "Alpha Three"
+          }
+        ],
+        "phones": [
+          {
+            "phone_number": "+A1",
+            "imei": "IMEI-A",
+            "owner_person_id": "P-A1"
+          },
+          {
+            "phone_number": "+A2",
+            "owner_person_id": "P-A2"
+          }
+        ],
+        "bank_accounts": [
+          {
+            "account_number": "ACC-A1",
+            "owner_person_id": "P-A1",
+            "holder_name": "Alpha One"
+          },
+          {
+            "account_number": "ACC-A2",
+            "owner_person_id": "P-A2",
+            "holder_name": "Alpha Two"
+          },
+          {
+            "account_number": "ACC-A3",
+            "owner_person_id": "P-A3",
+            "holder_name": "Alpha Three"
+          }
+        ],
+        "vehicles": [
+          {
+            "vin": "VIN-A1",
+            "owner_person_id": "P-A1"
+          }
+        ],
+        "locations": [
+          {
+            "location_id": "LOC-A1",
+            "name": "Alpha Plaza"
+          }
+        ]
+      },
+      "relationships": {
+        "communications": [
+          {
+            "call_id": "CALL-A-1",
+            "source_phone": "+A1",
+            "target_phone": "+A2",
+            "timestamp": "2026-01-01T10:00:00Z",
+            "duration_seconds": 30
+          }
+        ],
+        "transactions": [
+          {
+            "transaction_id": "TX-A-1",
+            "source_account": "ACC-A1",
+            "target_account": "ACC-A2",
+            "amount": 100.0,
+            "timestamp": "2026-01-02T10:00:00Z"
+          },
+          {
+            "transaction_id": "TX-A-2",
+            "source_account": "ACC-A2",
+            "target_account": "ACC-A3",
+            "amount": 90.0,
+            "timestamp": "2026-01-02T11:00:00Z"
+          }
+        ]
+      },
+      "surveillance_logs": [
+        {
+          "log_id": "SURV-A-1",
+          "location_id": "LOC-A1",
+          "timestamp": "2026-01-03T09:00:00Z",
+          "observed_person_ids": [
+            "P-A1",
+            "P-A2"
+          ],
+          "observed_vehicle_vins": [
+            "VIN-A1"
+          ],
+          "activity_description": "Meeting"
+        }
+      ],
+      "criminal_history": [
+        {
+          "record_id": "PRIOR-A1",
+          "person_id": "P-A1",
+          "case_number": "CC-A-1",
+          "offense": "Test Offense",
+          "year": 2019
+        }
+      ]
+    },
+    {
+      "_scenarios": [
+        "A existing entity receives a new case_id (P-A1, +A1, ACC-A1 join EQ-B)",
+        "D owner side effect (+B1 declares owner P-A1; ACC-B1 declares owner P-A1)",
+        "E cross-case CALL becoming a CROSS_CASE_LINK: +A1 now has EQ-B which +A2 lacks -> the OLD call CALL-A-1 flips",
+        "B (partial) relationships whose OTHER endpoint is declared in the same batch (+A1 -> +B1, ACC-B1 -> ACC-A1); the strict case -- both endpoints PRE-EXISTING from earlier cases -- is EQ-E",
+        "I fan-in aggregation: ACC-A2 receives from ACC-A1 (EQ-A), ACC-B1 and ACC-B2 (EQ-B) = 3 distinct sources"
+      ],
+      "_expect": [
+        "SHARED_ENTITY P-A1 [EQ-A, EQ-B]; SHARED_ENTITY +A1 [EQ-A, EQ-B]; SHARED_ENTITY ACC-A1 [EQ-A, EQ-B]",
+        "BRIDGE_NODE P-A1: 2 cases, assets = +A1, ACC-A1, VIN-A1, +B1, ACC-B1 (5 >= 2)",
+        "CROSS_CASE_LINK +A1 -> +A2 (old call; +A1 has EQ-B, +A2 does not)",
+        "CROSS_CASE_LINK +A1 -> +B1 ? NO: +B1 is declared in EQ-B and +A1 has [EQ-A, EQ-B]; +A1 has EQ-A which +B1 lacks -> YES, flagged",
+        "HIGH_FAN_IN ACC-A2 (in_degree 3) -- ACC-A2 case_ids stays [EQ-A] (endpoint-only in EQ-B, no append: preserved semantics)",
+        "TRANSFER_CHAIN ACC-B1 -> ACC-A1 -> ACC-A2 ; ACC-B2 -> ACC-A2 -> ACC-A3 ; ACC-B1 -> ACC-A1 -> ACC-A2 already counted; ACC-A1 -> ACC-A2 -> ACC-A3 (from EQ-A)",
+        "INFRASTRUCTURE_REUSE: IMEI-A shared by +A1 and +B1 (both declare imei IMEI-A)"
+      ],
+      "case_metadata": {
+        "case_id": "EQ-B",
+        "case_name": "Equivalence B",
+        "case_type": "TEST"
+      },
+      "entities": {
+        "people": [
+          {
+            "person_id": "P-A1",
+            "name": "Alpha One",
+            "aliases": [
+              "A1",
+              "The Alpha"
+            ],
+            "roles": [
+              "Suspect",
+              "Director"
+            ]
+          }
+        ],
+        "phones": [
+          {
+            "phone_number": "+A1",
+            "owner_person_id": "P-A1"
+          },
+          {
+            "phone_number": "+B1",
+            "imei": "IMEI-A",
+            "owner_person_id": "P-A1"
+          }
+        ],
+        "bank_accounts": [
+          {
+            "account_number": "ACC-A1",
+            "owner_person_id": "P-A1"
+          },
+          {
+            "account_number": "ACC-B1",
+            "owner_person_id": "P-A1",
+            "holder_name": "Alpha One (B)"
+          },
+          {
+            "account_number": "ACC-B2",
+            "holder_name": "Bravo Two"
+          }
+        ]
+      },
+      "relationships": {
+        "communications": [
+          {
+            "call_id": "CALL-B-1",
+            "source_phone": "+A1",
+            "target_phone": "+B1",
+            "timestamp": "2026-02-01T10:00:00Z",
+            "duration_seconds": 45
+          }
+        ],
+        "transactions": [
+          {
+            "transaction_id": "TX-B-1",
+            "source_account": "ACC-B1",
+            "target_account": "ACC-A1",
+            "amount": 10.0,
+            "timestamp": "2026-02-02T10:00:00Z"
+          },
+          {
+            "transaction_id": "TX-B-2",
+            "source_account": "ACC-B1",
+            "target_account": "ACC-A2",
+            "amount": 11.0,
+            "timestamp": "2026-02-02T10:05:00Z"
+          },
+          {
+            "transaction_id": "TX-B-3",
+            "source_account": "ACC-B2",
+            "target_account": "ACC-A2",
+            "amount": 12.0,
+            "timestamp": "2026-02-02T10:10:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "_scenarios": [
+        "J fan-out aggregation: ACC-C1 disburses to ACC-C2, ACC-C3, ACC-C4 (3 distinct targets)",
+        "L cross-domain path through every position: P-C1-OWNS->+C1-CALLED->+C2<-OWNS-P-C2-OWNS->ACC-C1-TRANSFERRED_TO->ACC-C2",
+        "C relationship where either endpoint is touched (calls / transfers reference declared and undeclared accounts)"
+      ],
+      "_expect": [
+        "HIGH_FAN_OUT ACC-C1 (out_degree 3)",
+        "CROSS_DOMAIN_PATH P-C1 <-> P-C2 via +C1 -> +C2 and ACC-C1 -> ACC-C2 / ACC-C3 / ACC-C4 (3 paths, distinct b2); plus P-A1 <-> P-A2 via +A1 -> +A2 and ACC-A2 -> ACC-A3 (exists since EQ-A)",
+        "TRANSFER_CHAIN: none (ACC-C2/3/4 have no outgoing transfers)"
+      ],
+      "case_metadata": {
+        "case_id": "EQ-C",
+        "case_name": "Equivalence C",
+        "case_type": "TEST"
+      },
+      "entities": {
+        "people": [
+          {
+            "person_id": "P-C1",
+            "name": "Charlie One"
+          },
+          {
+            "person_id": "P-C2",
+            "name": "Charlie Two"
+          }
+        ],
+        "phones": [
+          {
+            "phone_number": "+C1",
+            "owner_person_id": "P-C1"
+          },
+          {
+            "phone_number": "+C2",
+            "owner_person_id": "P-C2"
+          }
+        ],
+        "bank_accounts": [
+          {
+            "account_number": "ACC-C1",
+            "owner_person_id": "P-C2",
+            "holder_name": "Charlie Two"
+          }
+        ]
+      },
+      "relationships": {
+        "communications": [
+          {
+            "call_id": "CALL-C-1",
+            "source_phone": "+C1",
+            "target_phone": "+C2",
+            "timestamp": "2026-03-01T10:00:00Z",
+            "duration_seconds": 60
+          }
+        ],
+        "transactions": [
+          {
+            "transaction_id": "TX-C-1",
+            "source_account": "ACC-C1",
+            "target_account": "ACC-C2",
+            "amount": 1.0,
+            "timestamp": "2026-03-02T10:00:00Z"
+          },
+          {
+            "transaction_id": "TX-C-2",
+            "source_account": "ACC-C1",
+            "target_account": "ACC-C3",
+            "amount": 2.0,
+            "timestamp": "2026-03-02T10:01:00Z"
+          },
+          {
+            "transaction_id": "TX-C-3",
+            "source_account": "ACC-C1",
+            "target_account": "ACC-C4",
+            "amount": 3.0,
+            "timestamp": "2026-03-02T10:02:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "_scenarios": [
+        "K co-location through either endpoint: EQ-D observes P-D1 and VIN-D1 (new) at LOC-A1 next to the EQ-A observations",
+        "N prior-case link through PriorCase: PRIOR-A1 re-used by P-D1 (same record id -> same PriorCase node, second HAS_PRIOR_CASE)",
+        "Location referenced only via a surveillance log -> loc.case_ids stays [EQ-A]; the new edges carry case_id EQ-D (preserved semantics)"
+      ],
+      "_expect": [
+        "POSSIBLE_CO_LOCATION: 5 nodes at LOC-A1 (P-A1, P-A2, VIN-A1, P-D1, VIN-D1), one edge each -> 10 unordered pairs (< LIMIT 20)",
+        "PRIOR_CASE_LINK (P-D1, PRIOR-A1) in addition to (P-A1, PRIOR-A1); PriorCase PRIOR-A1 case_ids = [EQ-A, EQ-D]",
+        "SHARED_ENTITY: PriorCase/Location are NOT in the SHARED_ENTITY label set -> nothing new"
+      ],
+      "case_metadata": {
+        "case_id": "EQ-D",
+        "case_name": "Equivalence D",
+        "case_type": "TEST"
+      },
+      "entities": {
+        "people": [
+          {
+            "person_id": "P-D1",
+            "name": "Delta One"
+          }
+        ],
+        "vehicles": [
+          {
+            "vin": "VIN-D1",
+            "owner_person_id": "P-D1"
+          }
+        ]
+      },
+      "surveillance_logs": [
+        {
+          "log_id": "SURV-D-1",
+          "location_id": "LOC-A1",
+          "location_name": "Alpha Plaza",
+          "timestamp": "2026-04-01T09:00:00Z",
+          "observed_person_ids": [
+            "P-D1"
+          ],
+          "observed_vehicle_vins": [
+            "VIN-D1"
+          ],
+          "activity_description": "Sighting"
+        }
+      ],
+      "criminal_history": [
+        {
+          "record_id": "PRIOR-A1",
+          "person_id": "P-D1",
+          "case_number": "CC-A-1",
+          "offense": "Test Offense",
+          "year": 2019
+        }
+      ]
+    },
+    {
+      "_scenarios": [
+        "B relationship added between two PRE-EXISTING entities: +C1 (declared in EQ-C) -> +A2 (declared in EQ-A). Neither phone is declared in EQ-E, so neither gains EQ-E in case_ids (relationship writers are ON CREATE only: preserved semantics).",
+        "C either endpoint touched: the batch touches exactly {+C1, +A2} + CALLED; the new insights must be discoverable from the target phone +A2 alone as well as from the source +C1 alone."
+      ],
+      "_expect": [
+        "CROSS_CASE_LINK +C1 -> +A2  (+C1 has EQ-C which +A2 lacks; asymmetric predicate)",
+        "CROSS_DOMAIN_PATH P-C1 <-> P-A2 via +C1 -> +A2 and ACC-A2 -> ACC-A3 (P-A2 owns ACC-A2, TX-A-2 exists since EQ-A)",
+        "no SHARED_ENTITY / BRIDGE / fan / chain change; Case EQ-E has no INVOLVES edges at all on either path"
+      ],
+      "case_metadata": {
+        "case_id": "EQ-E",
+        "case_name": "Equivalence E",
+        "case_type": "TEST"
+      },
+      "relationships": {
+        "communications": [
+          {
+            "call_id": "CALL-E-1",
+            "source_phone": "+C1",
+            "target_phone": "+A2",
+            "timestamp": "2026-05-01T10:00:00Z",
+            "duration_seconds": 15
+          }
+        ]
+      }
+    }
+  ],
+  "expected_full_insights": {
+    "_doc": "Expected FULL InsightsEngine output (case_id=None) after all payloads; keys are canonical identities used by the harness. Counts per type.",
+    "SHARED_ENTITY": 3,
+    "CROSS_CASE_LINK": 3,
+    "BRIDGE_NODE": 1,
+    "TRANSFER_CHAIN": 4,
+    "HIGH_FAN_IN": 1,
+    "HIGH_FAN_OUT": 1,
+    "INFRASTRUCTURE_REUSE": 1,
+    "POSSIBLE_CO_LOCATION": 10,
+    "CROSS_DOMAIN_PATH": 5,
+    "PRIOR_CASE_LINK": 2
+  }
+}

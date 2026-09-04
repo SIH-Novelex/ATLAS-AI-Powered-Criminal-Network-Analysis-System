@@ -1,0 +1,57 @@
+{
+  "dataset_id": "DS-2026-08",
+  "dataset_version": "1.0",
+  "source_model": "forensic_cdr_etl_v2",
+  "case_data": {
+    "case_metadata": {
+      "case_id": "CASE-2024-003",
+      "case_name": "Narcotics Distribution Network Alpha",
+      "case_type": "NARCOTICS",
+      "status": "OPEN",
+      "jurisdiction": "Narcotics Control Bureau",
+      "lead_investigator": "Superintendent Ajay Kapoor",
+      "created_date": "2024-11-10",
+      "summary": "Interstate syndicate trafficking contraband across supply corridors.",
+      "tags": ["Narcotics", "Interstate", "Smuggling"]
+    },
+    "fir_records": [],
+    "entities": {
+      "people": [
+        {
+          "person_id": "P-010",
+          "name": "Sameer Khan",
+          "aliases": ["Sam", "Courier"],
+          "dob": "1990-07-19",
+          "national_id": "ID-SAM-9011",
+          "roles": ["Suspect", "Courier"],
+          "risk_level": "HIGH",
+          "notes": "Transport operative."
+        }
+      ],
+      "phones": [
+        {
+          "phone_number": "+919876543010",
+          "phone_id": "PH-010",
+          "imei": "IMEI-112233445566778",
+          "carrier": "Airtel",
+          "registered_owner": "Sameer Khan",
+          "owner_person_id": "P-010"
+        }
+      ],
+      "bank_accounts": [],
+      "vehicles": [],
+      "social_handles": [],
+      "ip_addresses": [],
+      "cell_towers": [],
+      "locations": []
+    },
+    "relationships": {
+      "communications": [],
+      "transactions": []
+    },
+    "surveillance_logs": [],
+    "criminal_history": [],
+    "intelligence_reports": []
+  }
+}
+
