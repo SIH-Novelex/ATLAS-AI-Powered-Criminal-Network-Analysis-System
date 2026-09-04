@@ -1,50 +1,63 @@
 ﻿<div align="center">
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- 🚀 DYNAMIC ANIMATED CYBER-FORENSIC HUD BANNER                      -->
+<!-- 🎖️ CLASSIFIED LEVEL-4 MILITARY & DEFENSE INTELLIGENCE HUD           -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <a href="#-system-architecture">
-  <img src="docs/assets/hero_banner.svg" width="100%" alt="AI-Powered Criminal Network Analysis System Hero Banner" />
+  <img src="docs/assets/classified_hud_banner.svg" width="100%" alt="Operation Graph-Nexus HUD Command Center" />
 </a>
 
 <br/>
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- 🎖️ LIVE MISSION TELEMETRY BADGES                                    -->
+<!-- 📡 REAL-TIME OPERATIONAL TELEMETRY CAPSULES                         -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <p align="center">
-  <img src="https://img.shields.io/badge/System_Status-MISSION_READY_🟢-00F5D4?style=for-the-badge&logo=radar&logoColor=black" alt="Status" />
-  <img src="https://img.shields.io/badge/Automated_Tests-211%20Passed%20(100%25)-00E676?style=for-the-badge&logo=pytest&logoColor=white" alt="Tests" />
-  <img src="https://img.shields.io/badge/AI_Copilot-Gemini_2.5_Flash_Online-7928CA?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
-  <img src="https://img.shields.io/badge/Graph_Engine-Neo4j_5.20_LTS-008CC1?style=for-the-badge&logo=neo4j&logoColor=white" alt="Neo4j" />
-  <img src="https://img.shields.io/badge/Blockchain-SHA--256_Custody-FF9900?style=for-the-badge&logo=blockchaindotcom&logoColor=white" alt="Blockchain" />
-  <img src="https://img.shields.io/badge/Failover_Protection-Zero--Downtime_Active-00BBF9?style=for-the-badge&logo=shield&logoColor=white" alt="Failover" />
+  <img src="https://img.shields.io/badge/MISSION_STATUS-ACTIVE_ARMED_🟢-00F5D4?style=for-the-badge&logo=radar&logoColor=black" alt="Status" />
+  <img src="https://img.shields.io/badge/TEST_HARNESS-211%20PASSED%20(100%25)-00E676?style=for-the-badge&logo=pytest&logoColor=white" alt="Tests" />
+  <img src="https://img.shields.io/badge/AI_COPILOT-GEMINI_2.5_FLASH_ONLINE-7928CA?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
+  <img src="https://img.shields.io/badge/GRAPH_CORE-NEO4J_5.20_LTS-008CC1?style=for-the-badge&logo=neo4j&logoColor=white" alt="Neo4j" />
+  <img src="https://img.shields.io/badge/CHAIN_OF_CUSTODY-SHA--256_BLOCKCHAIN-FF9900?style=for-the-badge&logo=blockchaindotcom&logoColor=white" alt="Blockchain" />
+  <img src="https://img.shields.io/badge/FAILOVER_PROTECTION-ZERO--DOWNTIME_ACTIVE-00BBF9?style=for-the-badge&logo=shield&logoColor=white" alt="Failover" />
 </p>
 
 ---
 
 <p align="center">
-  <b>An enterprise-grade forensic graph intelligence platform engineered for law enforcement, defense intelligence, and cyber-crime units.<br/>Harmonizes multi-jurisdictional FIRs, Call Detail Records (CDR), Banking Wires, and CCTV ANPR into an interactive Neo4j property graph, executes 10 autonomous pattern detectors, anchors evidence in a cryptographic blockchain, and features an integrated Gemini 2.5 Flash Graph Copilot with zero-downtime offline failover.</b>
+  <b>A state-of-the-art forensic graph intelligence platform engineered for law enforcement, intelligence bureaus, and cyber-crime task forces.<br/>
+  Autonomously ingests disparate multi-jurisdiction records (FIRs, CDRs, CCTV ANPR, Banking Wires), executes 10 algorithmic Cypher detectors, anchors evidence into an immutable SHA-256 blockchain, and features a conversational Gemini 2.5 Flash Graph Copilot with automated zero-downtime offline heuristic failover.</b>
 </p>
 
 </div>
 
 ---
 
-## 📑 Repository Navigation
+## 📑 Command Center Navigation
 
 | 🎨 [Frontend](frontend/README.md) | ⚙️ [Backend](backend/README.md) | 📂 [Dataset](dataset/README.md) | 🧪 [Tests](tests/README.md) | 🔒 [Blockchain](data/README.md) | 📑 [Documentation](docs/README.md) |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| Single Page App & Vis.js | FastAPI & Cypher Engine | Multi-Modal Case Payloads | 211 Passing Tests | SHA-256 Custody Ledger | Architecture Specifications |
+| Single Page App & Vis.js | FastAPI & Cypher Engine | Multi-Modal Forensic Files | 211 Passing Tests | SHA-256 Merkle Ledger | Technical Specifications |
 
 ---
 
-## 🤖 Interactive Gemini 2.5 Flash Graph Copilot
+## 🎯 Suspect Dossier & Threat Matrix
 
-The **Gemini AI Copilot** is docked directly inside the interactive graph visualization canvas (`#graphAiPanel`), enabling field officers and analysts without graph theory knowledge to query complex criminal topologies in plain natural language.
+When complex forensic datasets are ingested, the system autonomously links disparate criminal identities and computes mathematical centrality metrics to reveal hidden syndicate commanders.
 
 <div align="center">
-  <img src="docs/assets/copilot_terminal.svg" width="100%" alt="Gemini Copilot Terminal Interface" />
+  <img src="docs/assets/tactical_dossier.svg" width="100%" alt="Tactical Criminal Intelligence Dossier" />
+</div>
+
+<br/>
+
+---
+
+## 🤖 Gemini 2.5 Flash Autonomous Graph Copilot
+
+Field investigators and detectives do not have time to write complex Cypher graph queries. The **Gemini 2.5 Flash Copilot** is docked directly inside the interactive canvas (`#graphAiPanel`), translating human questions into instant topological and forensic intelligence.
+
+<div align="center">
+  <img src="docs/assets/copilot_terminal.svg" width="100%" alt="Interactive Gemini Copilot Terminal" />
 </div>
 
 <br/>
@@ -57,7 +70,7 @@ The **Gemini AI Copilot** is docked directly inside the interactive graph visual
 
 ---
 
-## 🔑 Gemini API Key Configuration & Rotation Guide
+## 🔑 Gemini API Key Configuration & Zero-Downtime Guarantee
 
 The platform uses Google Gemini 2.5 Flash. You can obtain a free key and rotate it at any time with zero downtime.
 
@@ -117,6 +130,20 @@ Continuous, case-scoped graph algorithms engineered to identify sophisticated cr
 | **8** | **Meeting & Association Clusters** | <img src="https://img.shields.io/badge/MEDIUM-F77F00?style=flat-square" /> | Calculates network clique density to discover co-accused meeting clusters. |
 | **9** | **Shell Company / Dummy Address Rings** | <img src="https://img.shields.io/badge/MEDIUM-F77F00?style=flat-square" /> | Detects multiple commercial legal entities registered to identical physical postal addresses. |
 | **10** | **Centrality Kingpin Leaderboard** | <img src="https://img.shields.io/badge/ANALYTIC-00BBF9?style=flat-square" /> | Executes PageRank & Betweenness Centrality to isolate network commanders vs. logistics mules. |
+
+---
+
+## 📊 Mathematical Centrality Radar: Why Graph AI Wins
+
+Standard relational SQL databases can only perform aggregate counts (e.g. *how many calls did suspect A make?*). Sophisticated syndicate commanders intentionally make very few calls, hiding behind chains of couriers and cutouts.
+
+By computing **Betweenness Centrality** and **PageRank**, our graph engine exposes the true kingpins who act as irreplaceable communication and financial bridges between criminal cells.
+
+<div align="center">
+  <img src="docs/assets/centrality_radar_chart.svg" width="100%" alt="Graph Centrality Radar Chart" />
+</div>
+
+<br/>
 
 ---
 
@@ -319,9 +346,11 @@ AI-Powered-Criminal-Network-Analysis-System/
 │
 └── docs/                               # 📑 Technical Specifications & Runbooks
     ├── assets/                         # 🎨 High-Res Vector SVG HUD Visuals
-    │   ├── hero_banner.svg             # Animated Radar & Packet-Flow Hero HUD
+    │   ├── classified_hud_banner.svg   # Level-4 Top Secret HUD with Radar & Frequency Waves
+    │   ├── tactical_dossier.svg        # Classified Suspect Dossier & Biometric Laser Scan
     │   ├── copilot_terminal.svg        # Glassmorphism Copilot Interaction Window
     │   ├── detectors_grid.svg          # 10 Cypher Pattern Detectors Dashboard
+    │   ├── centrality_radar_chart.svg  # Mathematical Graph Centrality Spider Chart
     │   └── blockchain_pipeline.svg     # Cryptographic Merkle Chain Flow
     ├── EVENTS_API.md                   # Real-time event streaming specification
     ├── SUMMARY.md                      # Comprehensive system architecture & entity model
