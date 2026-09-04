@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <!-- 🎖️ TACTICAL FORENSIC GRAPH HUD                                      -->
@@ -44,8 +44,8 @@
 The interactive single-page analyst workspace (`frontend/index.html`) rendered with real multi-case evidence:
 
 <div align="center">
-  <img src="docs/assets/dashboard_live_demo.png" width="100%" alt="Live Prototype Dashboard with Graph Explorer and Gemini Copilot" />
-  <p><i>Figure 1: Live Prototype Dashboard showing the ForceAtlas2 network topology on the left and the docked Gemini AI Copilot drawer on the right.</i></p>
+  <img src="docs/assets/command_center_dashboard.png" width="100%" alt="Atlas Command Center Dashboard" />
+  <p><i>Figure 1: Analyst Command Center Dashboard displaying ecosystem metrics, active FIR investigations, entity distribution histograms, and threat severity breakdown.</i></p>
 </div>
 
 <br/>
@@ -132,6 +132,13 @@ To prevent incorrect identity merging, the prototype uses **deterministic primar
 ## 🤖 Gemini 2.5 Flash Graph Copilot
 
 Field investigators and detectives do not have time to construct complex Cypher graph queries. The **Gemini 2.5 Flash Copilot** is docked directly inside the interactive canvas (`#graphAiPanel`), translating human questions into instant topological and forensic intelligence.
+
+<div align="center">
+  <img src="docs/assets/dashboard_live_demo.png" width="100%" alt="Interactive Graph Explorer with Docked Gemini AI Copilot" />
+  <p><i>Figure 2: Interactive ForceAtlas2 Graph Topology with docked Gemini AI Copilot chat drawer and quick prompt chips.</i></p>
+</div>
+
+<br/>
 
 <div align="center">
   <img src="docs/assets/copilot_terminal.svg" width="100%" alt="Interactive Gemini Copilot Terminal" />
@@ -399,7 +406,8 @@ AI-Powered-Criminal-Network-Analysis-System/
 │
 └── docs/                               # 📑 Technical Specifications & Runbooks
     ├── assets/                         # 🎨 High-Res Vector SVG HUD Visuals & Screenshots
-    │   ├── dashboard_live_demo.png     # Actual running prototype screenshot
+    │   ├── command_center_dashboard.png # Command Center overview & active cases
+    │   ├── dashboard_live_demo.png     # Graph Explorer & docked Gemini Copilot
     │   ├── classified_hud_banner.svg   # Level-4 Top Secret HUD with Radar & Frequency Waves
     │   ├── tactical_dossier.svg        # Classified Suspect Dossier & Biometric Laser Scan
     │   ├── copilot_terminal.svg        # Glassmorphism Copilot Interaction Window
