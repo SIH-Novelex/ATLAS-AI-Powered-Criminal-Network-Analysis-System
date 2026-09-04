@@ -1,5 +1,6 @@
 import time
 from typing import Any, Dict, List, Optional
+import neo4j
 from neo4j import GraphDatabase, Driver, Session, exceptions
 from backend.config import settings
 from backend.logging_config import logger
@@ -12,12 +13,15 @@ class Neo4jDatabase:
     def connect(self) -> Driver:
         if self._driver is None:
             try:
-                self._driver = GraphDatabase.driver(
-                    settings.NEO4J_URI,
-                    auth=(settings.NEO4J_USERNAME, settings.NEO4J_PASSWORD),
-                    max_connection_pool_size=settings.NEO4J_MAX_CONNECTION_POOL_SIZE,
-                    connection_timeout=5.0
-                )
+                driver_kwargs = {
+                    "auth": (settings.NEO4J_USERNAME, settings.NEO4J_PASSWORD),
+                    "max_connection_pool_size": settings.NEO4J_MAX_CONNECTION_POOL_SIZE,
+                    "connection_timeout": 5.0,
+                }
+                if hasattr(neo4j, "NotificationMinimumSeverity"):
+                    driver_kwargs["notifications_min_severity"] = getattr(neo4j, "NotificationMinimumSeverity").OFF
+
+                self._driver = GraphDatabase.driver(settings.NEO4J_URI, **driver_kwargs)
                 logger.info(f"Connected to Neo4j database at {settings.NEO4J_URI}")
             except Exception as e:
                 logger.error(f"Failed to create Neo4j driver: {e}")
