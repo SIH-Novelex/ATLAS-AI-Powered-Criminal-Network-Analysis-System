@@ -1,31 +1,30 @@
 ﻿<div align="center">
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- 🎖️ CLASSIFIED LEVEL-4 MILITARY & DEFENSE INTELLIGENCE HUD           -->
+<!-- 🎖️ TACTICAL FORENSIC GRAPH HUD                                      -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<a href="#-system-architecture">
-  <img src="docs/assets/classified_hud_banner.svg" width="100%" alt="Operation Graph-Nexus HUD Command Center" />
+<a href="#-reproducible-3-minute-evaluator-demo">
+  <img src="docs/assets/classified_hud_banner.svg" width="100%" alt="Forensic Graph Intelligence HUD" />
 </a>
 
 <br/>
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- 📡 REAL-TIME OPERATIONAL TELEMETRY CAPSULES                         -->
+<!-- 📡 PROTOTYPE VERIFICATION CAPSULES                                  -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <p align="center">
-  <img src="https://img.shields.io/badge/MISSION_STATUS-ACTIVE_ARMED_🟢-00F5D4?style=for-the-badge&logo=radar&logoColor=black" alt="Status" />
+  <img src="https://img.shields.io/badge/PROTOTYPE_STATUS-EVALUATION_READY_🟢-00F5D4?style=for-the-badge&logo=radar&logoColor=black" alt="Status" />
   <img src="https://img.shields.io/badge/TEST_HARNESS-211%20PASSED%20(100%25)-00E676?style=for-the-badge&logo=pytest&logoColor=white" alt="Tests" />
-  <img src="https://img.shields.io/badge/AI_COPILOT-GEMINI_2.5_FLASH_ONLINE-7928CA?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
+  <img src="https://img.shields.io/badge/AI_COPILOT-GEMINI_2.5_FLASH_+_HEURISTICS-7928CA?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
   <img src="https://img.shields.io/badge/GRAPH_CORE-NEO4J_5.20_LTS-008CC1?style=for-the-badge&logo=neo4j&logoColor=white" alt="Neo4j" />
-  <img src="https://img.shields.io/badge/CHAIN_OF_CUSTODY-SHA--256_BLOCKCHAIN-FF9900?style=for-the-badge&logo=blockchaindotcom&logoColor=white" alt="Blockchain" />
-  <img src="https://img.shields.io/badge/FAILOVER_PROTECTION-ZERO--DOWNTIME_ACTIVE-00BBF9?style=for-the-badge&logo=shield&logoColor=white" alt="Failover" />
+  <img src="https://img.shields.io/badge/CHAIN_OF_CUSTODY-SHA--256_HASH_CHAIN-FF9900?style=for-the-badge&logo=blockchaindotcom&logoColor=white" alt="Evidence Ledger" />
 </p>
 
 ---
 
 <p align="center">
-  <b>A state-of-the-art forensic graph intelligence platform engineered for law enforcement, intelligence bureaus, and cyber-crime task forces.<br/>
-  Autonomously ingests disparate multi-jurisdiction records (FIRs, CDRs, CCTV ANPR, Banking Wires), executes 10 algorithmic Cypher detectors, anchors evidence into an immutable SHA-256 blockchain, and features a conversational Gemini 2.5 Flash Graph Copilot with automated zero-downtime offline heuristic failover.</b>
+  <b>An AI-assisted criminal network analysis prototype engineered for law enforcement, intelligence analysts, and cyber-crime task forces.<br/>
+  Harmonizes fragmented multi-jurisdiction records (FIRs, CDRs, CCTV ANPR, Banking Wires) into a property graph, executes 10 algorithmic Cypher detectors, anchors forensic integrity in a hash-chained SHA-256 ledger, and assists investigators via an interactive Gemini 2.5 Flash Graph Copilot with offline heuristic fallback.</b>
 </p>
 
 </div>
@@ -40,9 +39,77 @@
 
 ---
 
-## 🎯 Suspect Dossier & Threat Matrix
+## 🖥️ Live Prototype Dashboard Interface
 
-When complex forensic datasets are ingested, the system autonomously links disparate criminal identities and computes mathematical centrality metrics to reveal hidden syndicate commanders.
+The interactive single-page analyst workspace (`frontend/index.html`) rendered with real multi-case evidence:
+
+<div align="center">
+  <img src="docs/assets/dashboard_live_demo.png" width="100%" alt="Live Prototype Dashboard with Graph Explorer and Gemini Copilot" />
+  <p><i>Figure 1: Live Prototype Dashboard showing the ForceAtlas2 network topology on the left and the docked Gemini AI Copilot drawer on the right.</i></p>
+</div>
+
+<br/>
+
+---
+
+## ⚡ Reproducible 3-Minute Evaluator Demo Script
+
+Judges and evaluators can verify the complete end-to-end investigative workflow in under 3 minutes using the bundled forensic datasets:
+
+```
+[Step 1: Start System] ──► [Step 2: Ingest Case 001] ──► [Step 3: Ingest Case 002 (Bridge Discovered)]
+                                                                    │
+[Step 6: Verify Ledger] ◄── [Step 5: Query Gemini Copilot] ◄── [Step 4: Run 10 Detectors]
+```
+
+### Step 1: Launch the Application
+```powershell
+# Option A: Docker Compose (Spins up Neo4j + FastAPI)
+docker-compose up -d
+
+# Option B: Native Local
+uvicorn backend.main:app --reload
+```
+Open your browser to: **`http://localhost:8000`**
+
+### Step 2: Ingest Case 001 (Homicide Investigation)
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/cases/ingest" -Method Post -InFile "dataset/case_001_homicide.json" -ContentType "application/json"
+```
+*Result*: Populates FIR details, suspect phone calls, and vehicle sightings for incident `CASE-2024-001`.
+
+### Step 3: Ingest Case 002 (Corporate Hawala Fraud)
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/cases/ingest" -Method Post -InFile "dataset/case_002_fraud.json" -ContentType "application/json"
+```
+*Evaluator Observation*: Notice how the graph autonomously discovers a **cross-case bridge**! Target **`Vikram Singh`** connects the homicide case directly to the financial laundering syndicate.
+
+### Step 4: Execute 10 Scoped Cypher Pattern Detectors
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/insights" -Method Get
+```
+*Evaluator Observation*: Returns 10 detected patterns in milliseconds, flagging Hawala layering, Burner SIM swapping, and cell tower co-location.
+
+### Step 5: Interrogate the Gemini AI Copilot
+Click the **"Ask AI"** button on the dashboard or query via REST API:
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/graph/ai-query" -Method Post `
+  -Body '{"query": "Summarize key suspects and explain how funds are being moved across cases."}' `
+  -ContentType "application/json"
+```
+*Evaluator Observation*: The Copilot synthesizes graph topology, PageRank scores, and transaction chains into plain investigative language. *(If no API key is provided, the built-in heuristic fallback responds instantly with zero errors!)*
+
+### Step 6: Verify Cryptographic Evidence Integrity
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/blockchain/verify" -Method Get
+```
+*Evaluator Observation*: Returns `{"status": "VALID", "total_blocks": 3}`, confirming the SHA-256 hash-chained Merkle ledger is intact.
+
+---
+
+## 🎯 Suspect Dossier & Network Centrality Matrix
+
+In forensic investigations, the system does not claim guilt; rather, it **ranks structurally significant entities and suspicious communication/financial patterns for investigator review**.
 
 <div align="center">
   <img src="docs/assets/tactical_dossier.svg" width="100%" alt="Tactical Criminal Intelligence Dossier" />
@@ -50,11 +117,21 @@ When complex forensic datasets are ingested, the system autonomously links dispa
 
 <br/>
 
+### How Entity Resolution is Handled (Preventing False Matches)
+To prevent incorrect identity merging, the prototype uses **deterministic primary business keys**:
+- **Phone Numbers**: E.164 MSISDN international format.
+- **Hardware**: Device IMEI / MAC identifiers.
+- **Financial Accounts**: Normalized IFSC + Account Number pairs.
+- **Government Identifiers**: PAN / Aadhaar / Passport unique hash keys.
+- **Vehicles**: State Registration / License Plate numbers.
+
+*(Entities with matching business keys are merged; entities without shared keys remain distinct nodes for investigator review).*
+
 ---
 
-## 🤖 Gemini 2.5 Flash Autonomous Graph Copilot
+## 🤖 Gemini 2.5 Flash Graph Copilot
 
-Field investigators and detectives do not have time to write complex Cypher graph queries. The **Gemini 2.5 Flash Copilot** is docked directly inside the interactive canvas (`#graphAiPanel`), translating human questions into instant topological and forensic intelligence.
+Field investigators and detectives do not have time to construct complex Cypher graph queries. The **Gemini 2.5 Flash Copilot** is docked directly inside the interactive canvas (`#graphAiPanel`), translating human questions into instant topological and forensic intelligence.
 
 <div align="center">
   <img src="docs/assets/copilot_terminal.svg" width="100%" alt="Interactive Gemini Copilot Terminal" />
@@ -70,7 +147,7 @@ Field investigators and detectives do not have time to write complex Cypher grap
 
 ---
 
-## 🔑 Gemini API Key Configuration & Zero-Downtime Guarantee
+## 🔑 Gemini API Key Configuration & Dual-Mode Fallback
 
 The platform uses Google Gemini 2.5 Flash. You can obtain a free key and rotate it at any time with zero downtime.
 
@@ -94,23 +171,23 @@ uvicorn backend.main:app --reload
 
 ---
 
-### 🛡️ Zero-Downtime Heuristic Failover Guarantee
-> [!IMPORTANT]
+### 🛡️ Dual-Mode Intelligence & Failover Mechanics
+> [!NOTE]
 > **What happens if your free Gemini credit expires or Google returns HTTP 429 Quota Exceeded?**
 >
-> The system includes a **hardened, autonomous fail-soft architecture** (`backend/services/gemini_service.py`):
+> The system implements a **fail-soft heuristic architecture** (`backend/services/gemini_service.py`):
 > 1. If the API key is missing, expired, or rate-limited, the system **never crashes, never fails, and displays zero error alerts**.
 > 2. It immediately shifts to an internal **Deterministic Graph Heuristics Engine**:
 >    - Dynamically evaluates node degree centrality, PageRank, and betweenness scores.
 >    - Scans active pattern detections (Hawala, SIM swaps, co-locations).
 >    - Generates a structured, evidence-backed investigative briefing directly in the chat panel.
-> 3. Once a new valid key is provided in `.env`, the system automatically resumes utilizing Gemini 2.5 Flash!
+> 3. Once a new valid key is provided in `.env`, the system automatically resumes utilizing Gemini 2.5 Flash.
 
 ---
 
 ## 🕵️ The 10 Scoped Cypher Pattern Detectors
 
-Continuous, case-scoped graph algorithms engineered to identify sophisticated criminal tradecraft:
+Continuous, case-scoped graph algorithms engineered to identify suspicious patterns for human investigator verification:
 
 <div align="center">
   <img src="docs/assets/detectors_grid.svg" width="100%" alt="10 Scoped Cypher Detectors HUD" />
@@ -129,15 +206,15 @@ Continuous, case-scoped graph algorithms engineered to identify sophisticated cr
 | **7** | **Crime Scene Co-Location** | <img src="https://img.shields.io/badge/HIGH-7928CA?style=flat-square" /> | Matches cell tower sector connections of multiple suspects within the temporal window of an FIR. |
 | **8** | **Meeting & Association Clusters** | <img src="https://img.shields.io/badge/MEDIUM-F77F00?style=flat-square" /> | Calculates network clique density to discover co-accused meeting clusters. |
 | **9** | **Shell Company / Dummy Address Rings** | <img src="https://img.shields.io/badge/MEDIUM-F77F00?style=flat-square" /> | Detects multiple commercial legal entities registered to identical physical postal addresses. |
-| **10** | **Centrality Kingpin Leaderboard** | <img src="https://img.shields.io/badge/ANALYTIC-00BBF9?style=flat-square" /> | Executes PageRank & Betweenness Centrality to isolate network commanders vs. logistics mules. |
+| **10** | **Centrality Leaderboard** | <img src="https://img.shields.io/badge/ANALYTIC-00BBF9?style=flat-square" /> | Executes PageRank & Betweenness Centrality to isolate network commanders vs. logistics mules. |
 
 ---
 
-## 📊 Mathematical Centrality Radar: Why Graph AI Wins
+## 📊 Graph Centrality: Revealing Structural Significance
 
-Standard relational SQL databases can only perform aggregate counts (e.g. *how many calls did suspect A make?*). Sophisticated syndicate commanders intentionally make very few calls, hiding behind chains of couriers and cutouts.
+Relational SQL queries only count raw totals (e.g. *number of calls or transactions*). In real-world syndicates, core coordinators purposely keep low call volumes, relying on intermediaries.
 
-By computing **Betweenness Centrality** and **PageRank**, our graph engine exposes the true kingpins who act as irreplaceable communication and financial bridges between criminal cells.
+By calculating **Betweenness Centrality** and **PageRank**, the graph engine isolates entities that act as structural bridges between otherwise disconnected clusters:
 
 <div align="center">
   <img src="docs/assets/centrality_radar_chart.svg" width="100%" alt="Graph Centrality Radar Chart" />
@@ -147,9 +224,9 @@ By computing **Betweenness Centrality** and **PageRank**, our graph engine expos
 
 ---
 
-## 🔒 Cryptographic Chain of Custody (Blockchain Ledger)
+## 🔒 Cryptographic Chain of Custody (Hash-Chained Ledger)
 
-In compliance with forensic digital evidence admissibility standards (e.g., Section 65B of the Indian Evidence Act / BSA provisions), every piece of ingested data is permanently anchored in a local cryptographic blockchain.
+To support legal admissibility standards (e.g., Section 65B of the Indian Evidence Act / BSA guidelines), the system implements a **local hash-chained evidence ledger**:
 
 <div align="center">
   <img src="docs/assets/blockchain_pipeline.svg" width="100%" alt="Blockchain Pipeline Diagram" />
@@ -157,9 +234,28 @@ In compliance with forensic digital evidence admissibility standards (e.g., Sect
 
 <br/>
 
-- **Deterministic Merkle Trees**: All nodes and edges are normalized and hashed with SHA-256.
-- **Unbroken Cryptographic Hash Chaining**: Every block contains the `previous_hash` of its predecessor.
-- **Tamper Verification API**: Call `GET /api/blockchain/verify` to validate ledger integrity anytime.
+- **Deterministic SHA-256 Merkle Roots**: All entities and relationships in an ingested payload are normalized and hashed into a Merkle root tree.
+- **Cryptographic Hash Chaining**: Every block contains the `previous_hash` of its predecessor. Altering a past record invalidates every subsequent block.
+- **Tamper Verification**: Call `GET /api/blockchain/verify` to validate ledger integrity anytime.
+
+---
+
+## 📋 What is Actually Implemented? (Prototype Scope & Roadmap)
+
+To maintain rigorous engineering integrity, here is the exact breakdown of implemented prototype components vs. production roadmap:
+
+| Capability | Status | Implementation Details |
+| :--- | :---: | :--- |
+| **Multi-Modal Graph Ingestion** | 🟢 **Implemented** | Normalizes FIRs, CDRs, Bank Wires, and CCTV ANPR into Neo4j property graph. |
+| **10 Scoped Cypher Detectors** | 🟢 **Implemented** | Automated Cypher algorithms for Hawala, Burner SIMs, convoys, and co-locations. |
+| **Gemini 2.5 Flash Copilot** | 🟢 **Implemented** | Natural language graph synthesis via official Google GenAI SDK. |
+| **Heuristic Fallback Engine** | 🟢 **Implemented** | Rule-based topology summarizer ensuring 100% offline uptime without API credits. |
+| **Hash-Chained Custody Ledger** | 🟢 **Implemented** | SHA-256 Merkle root block generator with tamper-verification API. |
+| **Automated Test Suite** | 🟢 **Implemented** | 211 passing unit & integration tests running completely offline in ~1.2 seconds. |
+| **Interactive Web Dashboard** | 🟢 **Implemented** | Vis.js ForceAtlas2 network explorer with docked Copilot chat drawer. |
+| **Deterministic Entity Matching**| 🟡 **Prototype Scope** | Strict primary key matching (Phone, IMEI, Account, PAN) to eliminate false merges. |
+| **Distributed Consensus** | 🔵 **Future Roadmap** | Multi-node Raft/PBFT consensus across separate agency jurisdictions. |
+| **Probabilistic Fuzzy NER** | 🔵 **Future Roadmap** | Legal NER fine-tuning for resolving fuzzy suspect name variants. |
 
 ---
 
@@ -218,52 +314,9 @@ flowchart TD
 
 ---
 
-## 🚀 Quickstart & Installation
-
-### Option 1: One-Click Docker Setup (Recommended)
-Spins up Neo4j 5.x and the FastAPI application with all APOC graph procedures pre-installed:
-
-```powershell
-# 1. Clone the repository
-git clone https://github.com/Thxrun-07/AI-Powered-Criminal-Network-Analysis-System.git
-cd AI-Powered-Criminal-Network-Analysis-System
-
-# 2. Configure environment
-copy .env.example .env
-
-# 3. Start containers
-docker-compose up -d
-```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser!
-
----
-
-### Option 2: Native Local Setup
-
-```powershell
-# 1. Clone & enter repository
-git clone https://github.com/Thxrun-07/AI-Powered-Criminal-Network-Analysis-System.git
-cd AI-Powered-Criminal-Network-Analysis-System
-
-# 2. Create virtual environment
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Configure environment
-copy .env.example .env
-
-# 5. Launch application
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
----
-
 ## 🧪 Comprehensive Verification Suite
 
-Run all 211 unit and integration tests completely offline without requiring an external database:
+Run all 211 unit and integration tests completely offline:
 
 ```powershell
 pytest tests/unit tests/integration
@@ -296,7 +349,7 @@ tests\integration\test_ingest_replace.py ..                              [ 91%]
 tests\integration\test_legacy_ingest_casedata.py ................        [ 99%]
 tests\integration\test_unified_ingest.py .                               [100%]
 
-====================== 211 passed in 3.01s =======================
+====================== 211 passed in 1.22s =======================
 ```
 
 ---
@@ -345,7 +398,8 @@ AI-Powered-Criminal-Network-Analysis-System/
 │   └── README.md                       # 👉 Blockchain & Tamper-Proofing Guide
 │
 └── docs/                               # 📑 Technical Specifications & Runbooks
-    ├── assets/                         # 🎨 High-Res Vector SVG HUD Visuals
+    ├── assets/                         # 🎨 High-Res Vector SVG HUD Visuals & Screenshots
+    │   ├── dashboard_live_demo.png     # Actual running prototype screenshot
     │   ├── classified_hud_banner.svg   # Level-4 Top Secret HUD with Radar & Frequency Waves
     │   ├── tactical_dossier.svg        # Classified Suspect Dossier & Biometric Laser Scan
     │   ├── copilot_terminal.svg        # Glassmorphism Copilot Interaction Window
@@ -364,7 +418,7 @@ AI-Powered-Criminal-Network-Analysis-System/
 
 <p align="center">
   <b>Built for the Smart India Hackathon (SIH) &bull; National Law Enforcement Innovation</b><br/>
-  <i>Empowering investigators with Graph AI, Cryptographic Integrity, and Autonomous Reasoning.</i>
+  <i>Empowering investigators with Graph AI, Cryptographic Integrity, and Explainable Reasoning.</i>
 </p>
 
 </div>
