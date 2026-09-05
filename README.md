@@ -421,6 +421,9 @@ AI-Powered-Criminal-Network-Analysis-System/
 ```
 
 ---
+## Deployed on:
+Render: https://ai-powered-criminal-network-analysis-7joz.onrender.com/
+
 
 <div align="center">
 
