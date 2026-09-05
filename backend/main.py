@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, Response
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -122,5 +122,11 @@ def serve_dashboard():
     if template_path.exists():
         return template_path.read_text(encoding="utf-8")
     return "<h1>AI-Powered Criminal Network Analysis System API (Dashboard template not found)</h1>"
+
+
+@app.head("/", tags=["Dashboard"], include_in_schema=False)
+def serve_dashboard_head():
+    """Health & load-balancer probe for the root dashboard."""
+    return Response(status_code=status.HTTP_200_OK)
 
 
