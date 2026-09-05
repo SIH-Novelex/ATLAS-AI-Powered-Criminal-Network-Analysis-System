@@ -167,7 +167,7 @@ The platform uses Google Gemini 2.5 Flash. You can obtain a free key and rotate 
 Edit or create your `.env` file in the project root:
 ```ini
 # .env
-GEMINI_API_KEY=AIzaSyYourGeneratedGeminiKeyHere
+GEMINI_API_KEY=YOUR-API-KEY
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
